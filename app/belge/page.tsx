@@ -358,7 +358,7 @@ export default function DocumentConverter() {
         }
 
         const bytes = await doc.save();
-        const blob = new Blob([bytes], { type: "application/pdf" });
+        const blob = new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
         setResultName(`${baseName}.pdf`);
         setResultUrl(URL.createObjectURL(blob));
       }

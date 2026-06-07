@@ -47,7 +47,7 @@ async function convertToPdf(file: File): Promise<Blob> {
   const page = doc.addPage([image.width, image.height]);
   page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
   const bytes = await doc.save();
-  return new Blob([bytes], { type: "application/pdf" });
+  return new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
 }
 
 export default function ImageConverter() {
