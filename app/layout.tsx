@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
@@ -36,8 +37,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <SiteHeader />
-        {children}
+        <ClerkProvider>
+          <SiteHeader />
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );
