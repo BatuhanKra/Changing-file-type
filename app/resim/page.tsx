@@ -21,7 +21,7 @@ async function imageFileToCanvas(file: File): Promise<HTMLCanvasElement> {
   canvas.width = bitmap.width;
   canvas.height = bitmap.height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas oluşturulamadı");
+  if (!ctx) throw new Error("CANVAS_ERROR");
   ctx.drawImage(bitmap, 0, 0);
   return canvas;
 }
@@ -31,7 +31,7 @@ async function convertToImage(file: File, mimeType: string): Promise<Blob> {
   const blob: Blob | null = await new Promise((resolve) =>
     canvas.toBlob(resolve, mimeType, 0.92)
   );
-  if (!blob) throw new Error("Dönüşüm başarısız oldu");
+  if (!blob) throw new Error("CONVERT_FAILED");
   return blob;
 }
 
@@ -122,7 +122,13 @@ export default function ImageConverter() {
       }
       setResults(newResults);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("image.errUnknown"));
+      if (err instanceof Error && err.message === "CANVAS_ERROR") {
+        setError(t("image.errCanvas"));
+      } else if (err instanceof Error && err.message === "CONVERT_FAILED") {
+        setError(t("image.errConvertFailed"));
+      } else {
+        setError(err instanceof Error ? err.message : t("image.errUnknown"));
+      }
     } finally {
       setBusy(false);
     }

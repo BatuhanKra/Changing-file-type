@@ -219,9 +219,11 @@ export default function DocumentConverter() {
     if (selected && selected.size > limits.maxSizeMb * 1024 * 1024) {
       setFile(null);
       setError(
-        `"${selected.name}" dosyası ${limits.maxSizeMb} MB sınırını aşıyor${
-          premium ? "" : " (Premium'da sınır 200 MB'a çıkar)"
-        }.`
+        t("doc.errTooLarge", {
+          name: selected.name,
+          limit: limits.maxSizeMb,
+          extra: premium ? "" : t("doc.errTooLargeExtra"),
+        })
       );
       return;
     }

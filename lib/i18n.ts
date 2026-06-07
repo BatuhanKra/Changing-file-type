@@ -84,6 +84,8 @@ const DICT = {
     "image.errTooLarge": "\"{name}\" dosyası {limit} MB sınırını aşıyor{extra}.",
     "image.errTooLargeExtra": " (Premium'da sınır 200 MB'a çıkar)",
     "image.errUnknown": "Bilinmeyen bir hata oluştu",
+    "image.errCanvas": "Canvas oluşturulamadı",
+    "image.errConvertFailed": "Dönüşüm başarısız oldu",
 
     "doc.title": "Belge Dönüştürücü",
     "doc.direction": "Yön",
@@ -95,6 +97,8 @@ const DICT = {
     "doc.converting": "Dönüştürülüyor…",
     "doc.download": "⬇ {name} dosyasını indir",
     "doc.errUnknown": "Bilinmeyen bir hata oluştu",
+    "doc.errTooLarge": "\"{name}\" dosyası {limit} MB sınırını aşıyor{extra}.",
+    "doc.errTooLargeExtra": " (Premium'da sınır 200 MB'a çıkar)",
   },
   en: {
     "nav.signIn": "Sign in",
@@ -143,6 +147,8 @@ const DICT = {
     "image.errTooLarge": "\"{name}\" exceeds the {limit} MB limit{extra}.",
     "image.errTooLargeExtra": " (Premium raises the limit to 200 MB)",
     "image.errUnknown": "An unknown error occurred",
+    "image.errCanvas": "Could not create canvas",
+    "image.errConvertFailed": "Conversion failed",
 
     "doc.title": "Document Converter",
     "doc.direction": "Direction",
@@ -154,6 +160,8 @@ const DICT = {
     "doc.converting": "Converting…",
     "doc.download": "⬇ Download {name}",
     "doc.errUnknown": "An unknown error occurred",
+    "doc.errTooLarge": "\"{name}\" exceeds the {limit} MB limit{extra}.",
+    "doc.errTooLargeExtra": " (Premium raises the limit to 200 MB)",
 
     "footer.privacy": "Privacy Policy",
     "footer.rights": "All rights reserved.",
