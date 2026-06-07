@@ -39,6 +39,35 @@ const DICT = {
 
     "back.home": "← Ana sayfa",
 
+    "footer.privacy": "Gizlilik Politikası",
+    "footer.rights": "Tüm hakları saklıdır.",
+
+    "privacy.title": "Gizlilik Politikası",
+    "privacy.updated": "Son güncelleme: 8 Haziran 2026",
+    "privacy.intro":
+      "Convertit olarak gizliliğinize önem veriyoruz. Bu sayfa, sitemizi kullanırken hangi verilerin toplandığını ve nasıl kullanıldığını açıklar.",
+    "privacy.section1.title": "1. Dosya Dönüştürme İşlemleri",
+    "privacy.section1.body":
+      "Convertit'teki tüm dosya dönüştürme işlemleri tamamen tarayıcınızda gerçekleşir. Yüklediğiniz dosyalar hiçbir zaman sunucularımıza gönderilmez veya saklanmaz.",
+    "privacy.section2.title": "2. Hesap Bilgileri",
+    "privacy.section2.body":
+      "Kayıt olduğunuzda, kimlik doğrulama hizmeti sağlayıcımız Clerk aracılığıyla ad, e-posta adresi gibi temel hesap bilgileriniz işlenir. Bu bilgiler yalnızca hesabınızı yönetmek ve premium üyelik durumunuzu belirlemek için kullanılır.",
+    "privacy.section3.title": "3. Ödeme Bilgileri",
+    "privacy.section3.body":
+      "Premium üyelik satın aldığınızda ödeme işlemleriniz, yetkili Resmi Satıcımız (Merchant of Record) Paddle.com tarafından güvenli şekilde işlenir. Kredi kartı bilgileriniz hiçbir zaman bizim sunucularımızdan geçmez veya tarafımızca saklanmaz.",
+    "privacy.section4.title": "4. Çerezler ve Reklamlar",
+    "privacy.section4.body":
+      "Sitemizde Google AdSense aracılığıyla reklam gösterilebilir. Google ve iş ortakları, sitemize ve diğer sitelere yaptığınız ziyaretlere dayalı reklamlar sunmak için çerezler kullanabilir. Tarayıcı ayarlarınızdan çerezleri yönetebilir veya devre dışı bırakabilirsiniz.",
+    "privacy.section5.title": "5. Veri Paylaşımı",
+    "privacy.section5.body":
+      "Kişisel verileriniz; Clerk (kimlik doğrulama), Paddle (ödeme işleme) ve Google (reklam) gibi yalnızca hizmetin çalışması için gerekli olan güvenilir hizmet sağlayıcılarla paylaşılır. Verileriniz hiçbir şekilde satılmaz.",
+    "privacy.section6.title": "6. Haklarınız",
+    "privacy.section6.body":
+      "Hesabınızla ilişkili kişisel verilerinizin görüntülenmesini, güncellenmesini veya silinmesini istediğinizde bizimle iletişime geçebilirsiniz.",
+    "privacy.contact.title": "7. İletişim",
+    "privacy.contact.body":
+      "Gizlilik politikamızla ilgili sorularınız için bizimle iletişime geçebilirsiniz.",
+
     "image.title": "Resim Dönüştürücü",
     "image.planFree": "Ücretsiz plan: tek seferde 1 dosya, dosya başına {limit} MB. Daha fazlası için sağ üstten Premium'a geçebilirsiniz.",
     "image.planPremium": "✦ Premium plan: aynı anda {files} dosyaya kadar, dosya başına {limit} MB.",
@@ -111,6 +140,35 @@ const DICT = {
     "doc.title": "Document Converter",
     "doc.direction": "Direction",
     "doc.dropFile": "Click to select a file",
+
+    "footer.privacy": "Privacy Policy",
+    "footer.rights": "All rights reserved.",
+
+    "privacy.title": "Privacy Policy",
+    "privacy.updated": "Last updated: June 8, 2026",
+    "privacy.intro":
+      "At Convertit, we care about your privacy. This page explains what data is collected when you use our site and how it is used.",
+    "privacy.section1.title": "1. File Conversion",
+    "privacy.section1.body":
+      "All file conversions on Convertit happen entirely in your browser. The files you upload are never sent to or stored on our servers.",
+    "privacy.section2.title": "2. Account Information",
+    "privacy.section2.body":
+      "When you sign up, basic account information such as your name and email address is processed through our authentication provider, Clerk. This information is used solely to manage your account and determine your premium membership status.",
+    "privacy.section3.title": "3. Payment Information",
+    "privacy.section3.body":
+      "When you purchase a premium membership, your payment is securely processed by our authorized Merchant of Record, Paddle.com. Your card details never pass through or get stored on our servers.",
+    "privacy.section4.title": "4. Cookies and Advertising",
+    "privacy.section4.body":
+      "Our site may display ads through Google AdSense. Google and its partners may use cookies to serve ads based on your visits to this and other sites. You can manage or disable cookies through your browser settings.",
+    "privacy.section5.title": "5. Data Sharing",
+    "privacy.section5.body":
+      "Your personal data is shared only with trusted service providers necessary for the site to function, such as Clerk (authentication), Paddle (payment processing), and Google (advertising). We never sell your data.",
+    "privacy.section6.title": "6. Your Rights",
+    "privacy.section6.body":
+      "You may contact us at any time to view, update, or request deletion of the personal data associated with your account.",
+    "privacy.contact.title": "7. Contact",
+    "privacy.contact.body":
+      "If you have any questions about this privacy policy, feel free to reach out to us.",
   },
 } as const;
 

@@ -101,6 +101,13 @@ export default function Home() {
             </div>
           </div>
         </main>
+
+        <footer className="flex w-full max-w-3xl flex-col items-center gap-2 px-6 pb-10 text-xs text-foreground/40 sm:flex-row sm:justify-between">
+          <span>© {new Date().getFullYear()} Convertit · {t("footer.rights")}</span>
+          <Link href="/gizlilik" className="transition-colors hover:text-accent">
+            {t("footer.privacy")}
+          </Link>
+        </footer>
       </div>
     </div>
   );
