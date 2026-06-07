@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dosya Çevirme Aracı",
+  title: "Convertit",
   description: "Resim ve belge dosyalarınızı tarayıcınızda, hiçbir yere yüklemeden dönüştürün.",
 };
 

@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { usePremium, LIMITS } from "@/lib/premium";
+import { useLanguage } from "@/lib/i18n";
 
 export default function SiteHeader() {
   const { premium, toggle } = usePremium();
+  const { lang, toggle: toggleLang, t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-10 border-b border-card-border bg-background/80 backdrop-blur-md">
@@ -15,16 +17,24 @@ export default function SiteHeader() {
             ⇄
           </span>
           <span className="text-lg font-semibold tracking-tight text-foreground">
-            Dosya Çevirme Aracı
+            Convertit
           </span>
           {premium && (
             <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-2.5 py-0.5 text-xs font-semibold text-black shadow-sm">
-              ✦ Premium
+              {t("nav.premiumBadge")}
             </span>
           )}
         </Link>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleLang}
+            title={lang === "tr" ? "Switch to English" : "Türkçe'ye geç"}
+            className="rounded-full border border-card-border px-3 py-2 text-sm font-medium text-foreground/70 transition-colors hover:bg-accent-soft hover:text-accent"
+          >
+            {lang === "tr" ? "EN" : "TR"}
+          </button>
+
           <button
             onClick={toggle}
             title={
@@ -38,18 +48,18 @@ export default function SiteHeader() {
                 : "rounded-full bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90"
             }
           >
-            {premium ? "Premium'dan çık" : "✦ Premium'a geç"}
+            {premium ? t("nav.premiumOn") : t("nav.premiumOff")}
           </button>
 
           <Show when="signed-out">
             <SignInButton mode="modal">
               <button className="rounded-full border border-card-border px-4 py-2 text-sm font-medium text-foreground/70 transition-colors hover:bg-accent-soft hover:text-accent">
-                Giriş yap
+                {t("nav.signIn")}
               </button>
             </SignInButton>
             <SignUpButton mode="modal">
               <button className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90">
-                Kayıt ol
+                {t("nav.signUp")}
               </button>
             </SignUpButton>
           </Show>

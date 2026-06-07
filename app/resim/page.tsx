@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePremium, limitsFor } from "@/lib/premium";
+import { useLanguage } from "@/lib/i18n";
 
 const FORMATS = [
   { value: "image/jpeg", label: "JPG", ext: "jpg" },
@@ -53,6 +54,7 @@ async function convertToPdf(file: File): Promise<Blob> {
 export default function ImageConverter() {
   const { premium } = usePremium();
   const limits = limitsFor(premium);
+  const { t } = useLanguage();
 
   const [files, setFiles] = useState<File[]>([]);
   const [targetFormat, setTargetFormat] = useState(FORMATS[0].value);
@@ -74,8 +76,8 @@ export default function ImageConverter() {
       setFiles([]);
       setError(
         premium
-          ? `Premium planda aynı anda en fazla ${limits.maxFiles} dosya yükleyebilirsiniz.`
-          : `Ücretsiz planda tek seferde yalnızca 1 dosya yükleyebilirsiniz. Daha fazlası için Premium'a geçin.`
+          ? t("image.errFileCountPremium", { limit: limits.maxFiles })
+          : t("image.errFileCountFree")
       );
       return;
     }
@@ -84,9 +86,11 @@ export default function ImageConverter() {
     if (tooLarge) {
       setFiles([]);
       setError(
-        `"${tooLarge.name}" dosyası ${limits.maxSizeMb} MB sınırını aşıyor${
-          premium ? "" : " (Premium'da sınır 200 MB'a çıkar)"
-        }.`
+        t("image.errTooLarge", {
+          name: tooLarge.name,
+          limit: limits.maxSizeMb,
+          extra: premium ? "" : t("image.errTooLargeExtra"),
+        })
       );
       return;
     }
@@ -117,7 +121,7 @@ export default function ImageConverter() {
       }
       setResults(newResults);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu");
+      setError(err instanceof Error ? err.message : t("image.errUnknown"));
     } finally {
       setBusy(false);
     }
@@ -127,7 +131,7 @@ export default function ImageConverter() {
     <div className="flex flex-col flex-1 items-center bg-background">
       <main className="flex w-full max-w-xl flex-col gap-6 py-12 px-6">
         <Link href="/" className="text-sm text-foreground/50 transition-colors hover:text-accent">
-          ← Ana sayfa
+          {t("back.home")}
         </Link>
 
         <div className="flex items-center gap-3">
@@ -135,7 +139,7 @@ export default function ImageConverter() {
             🖼️
           </span>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Resim Dönüştürücü
+            {t("image.title")}
           </h1>
         </div>
 
@@ -148,17 +152,17 @@ export default function ImageConverter() {
             }
           >
             {premium
-              ? `✦ Premium plan: aynı anda ${limits.maxFiles} dosyaya kadar, dosya başına ${limits.maxSizeMb} MB.`
-              : `Ücretsiz plan: tek seferde 1 dosya, dosya başına ${limits.maxSizeMb} MB. Daha fazlası için sağ üstten Premium'a geçebilirsiniz.`}
+              ? t("image.planPremium", { files: limits.maxFiles, limit: limits.maxSizeMb })
+              : t("image.planFree", { limit: limits.maxSizeMb })}
           </p>
 
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-card-border bg-background/40 px-4 py-8 text-center transition-colors hover:border-accent/50">
             <span className="text-2xl">📤</span>
             <span className="text-sm font-medium text-foreground">
-              {files.length > 0 ? `${files.length} dosya seçildi` : "Dosya seçmek için tıklayın"}
+              {files.length > 0 ? t("image.selectedCount", { count: files.length }) : t("image.selectFile")}
             </span>
             <span className="text-xs text-foreground/50">
-              {premium ? "Birden fazla dosya seçebilirsiniz" : "JPG, PNG veya WEBP"}
+              {premium ? t("image.dropMulti") : t("image.dropSingle")}
             </span>
             <input
               type="file"
@@ -182,7 +186,7 @@ export default function ImageConverter() {
 
           <div className="flex items-center gap-3">
             <label className="text-sm font-medium text-foreground/70">
-              Hedef format
+              {t("image.targetFormat")}
             </label>
             <select
               value={targetFormat}
@@ -202,7 +206,7 @@ export default function ImageConverter() {
             disabled={files.length === 0 || busy}
             className="rounded-full bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? "Dönüştürülüyor…" : "Dönüştür"}
+            {busy ? t("image.converting") : t("image.convert")}
           </button>
 
           {error && (
@@ -220,7 +224,7 @@ export default function ImageConverter() {
                   download={r.name}
                   className="flex items-center justify-center gap-2 rounded-full border border-accent/30 bg-accent-soft px-5 py-3 text-center text-sm font-medium text-accent transition-colors hover:bg-accent/15"
                 >
-                  ⬇ {r.name} dosyasını indir
+                  {t("image.download", { name: r.name })}
                 </a>
               ))}
             </div>

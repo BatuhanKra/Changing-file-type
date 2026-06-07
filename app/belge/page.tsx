@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePremium, limitsFor } from "@/lib/premium";
+import { useLanguage } from "@/lib/i18n";
 
 type Direction =
   | "docx-to-txt"
@@ -200,6 +201,7 @@ async function extractPdfPageTexts(file: File): Promise<string[]> {
 export default function DocumentConverter() {
   const { premium } = usePremium();
   const limits = limitsFor(premium);
+  const { t } = useLanguage();
 
   const [direction, setDirection] = useState<Direction>("docx-to-txt");
   const [file, setFile] = useState<File | null>(null);
@@ -375,7 +377,7 @@ export default function DocumentConverter() {
     <div className="flex flex-col flex-1 items-center bg-background">
       <main className="flex w-full max-w-xl flex-col gap-6 py-12 px-6">
         <Link href="/" className="text-sm text-foreground/50 transition-colors hover:text-accent">
-          ← Ana sayfa
+          {t("back.home")}
         </Link>
 
         <div className="flex items-center gap-3">
@@ -383,7 +385,7 @@ export default function DocumentConverter() {
             📄
           </span>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Belge Dönüştürücü
+            {t("doc.title")}
           </h1>
         </div>
 
@@ -401,7 +403,7 @@ export default function DocumentConverter() {
           </p>
 
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-foreground/70">Yön</label>
+            <label className="text-sm font-medium text-foreground/70">{t("doc.direction")}</label>
             <select
               value={direction}
               onChange={(e) => {
@@ -423,7 +425,7 @@ export default function DocumentConverter() {
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-card-border bg-background/40 px-4 py-8 text-center transition-colors hover:border-accent/50">
             <span className="text-2xl">📤</span>
             <span className="text-sm font-medium text-foreground">
-              {file ? file.name : "Dosya seçmek için tıklayın"}
+              {file ? file.name : t("doc.dropFile")}
             </span>
             <span className="text-xs text-foreground/50">{accept.toUpperCase()} dosyası</span>
             <input
