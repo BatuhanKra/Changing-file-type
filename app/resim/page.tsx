@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePremium, limitsFor } from "@/lib/premium";
+import { limitsFor } from "@/lib/premium";
+import { useRealPremium } from "@/lib/useRealPremium";
 import { useLanguage } from "@/lib/i18n";
 
 const FORMATS = [
@@ -52,7 +53,7 @@ async function convertToPdf(file: File): Promise<Blob> {
 }
 
 export default function ImageConverter() {
-  const { premium } = usePremium();
+  const { premium } = useRealPremium();
   const limits = limitsFor(premium);
   const { t } = useLanguage();
 

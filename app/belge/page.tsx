@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePremium, limitsFor } from "@/lib/premium";
+import { limitsFor } from "@/lib/premium";
+import { useRealPremium } from "@/lib/useRealPremium";
 import { useLanguage } from "@/lib/i18n";
 
 type Direction =
@@ -199,7 +200,7 @@ async function extractPdfPageTexts(file: File): Promise<string[]> {
 }
 
 export default function DocumentConverter() {
-  const { premium } = usePremium();
+  const { premium } = useRealPremium();
   const limits = limitsFor(premium);
   const { t } = useLanguage();
 

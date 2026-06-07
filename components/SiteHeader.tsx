@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { usePremium, LIMITS } from "@/lib/premium";
+import { useRealPremium } from "@/lib/useRealPremium";
 import { useLanguage } from "@/lib/i18n";
+import PremiumButton from "./PremiumButton";
 
 export default function SiteHeader() {
-  const { premium, toggle } = usePremium();
+  const { premium } = useRealPremium();
   const { lang, toggle: toggleLang, t } = useLanguage();
 
   return (
@@ -35,21 +36,7 @@ export default function SiteHeader() {
             {lang === "tr" ? "EN" : "TR"}
           </button>
 
-          <button
-            onClick={toggle}
-            title={
-              premium
-                ? `Premium aktif: aynı anda ${LIMITS.premium.maxFiles} dosyaya kadar, dosya başına ${LIMITS.premium.maxSizeMb} MB`
-                : `Ücretsiz plan: tek seferde 1 dosya, dosya başına ${LIMITS.free.maxSizeMb} MB`
-            }
-            className={
-              premium
-                ? "rounded-full border border-amber-400/70 px-4 py-2 text-sm font-medium text-amber-500 transition-colors hover:bg-amber-400/10"
-                : "rounded-full bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90"
-            }
-          >
-            {premium ? t("nav.premiumOn") : t("nav.premiumOff")}
-          </button>
+          <PremiumButton />
 
           <Show when="signed-out">
             <SignInButton mode="modal">
