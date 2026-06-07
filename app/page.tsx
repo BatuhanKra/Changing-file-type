@@ -25,6 +25,12 @@ export default function Home() {
       title: t("home.tool.merge.title"),
       description: t("home.tool.merge.desc"),
     },
+    {
+      href: "/tablo-donustur",
+      icon: "📊",
+      title: t("home.tool.table.title"),
+      description: t("home.tool.table.desc"),
+    },
   ];
 
   return (

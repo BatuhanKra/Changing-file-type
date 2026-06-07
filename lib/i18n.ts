@@ -27,6 +27,8 @@ const DICT = {
     "home.tool.doc.desc": "DOCX, TXT, PDF ve Markdown formatları arasında çevirin",
     "home.tool.merge.title": "PDF Birleştirici",
     "home.tool.merge.desc": "Birden fazla PDF dosyasını tek bir dosyada birleştirin",
+    "home.tool.table.title": "Excel/CSV Dönüştürücü",
+    "home.tool.table.desc": "XLSX ve CSV formatları arasında çevirin",
     "home.open": "Aç →",
     "home.plan.free.title": "Ücretsiz Plan",
     "home.plan.free.item1": "Tek seferde 1 dosya",
@@ -40,6 +42,7 @@ const DICT = {
     "home.plan.premium.note": "Sağ üstteki \"Premium'a geç\" düğmesiyle deneyebilirsiniz.",
 
     "back.home": "← Ana sayfa",
+    "common.dragHint": "veya dosyayı buraya sürükleyip bırakın",
 
     "footer.privacy": "Gizlilik Politikası",
     "footer.rights": "Tüm hakları saklıdır.",
@@ -103,6 +106,7 @@ const DICT = {
     "doc.errUnknown": "Bilinmeyen bir hata oluştu",
     "doc.errTooLarge": "\"{name}\" dosyası {limit} MB sınırını aşıyor{extra}.",
     "doc.errTooLargeExtra": " (Premium'da sınır 200 MB'a çıkar)",
+    "doc.pdfImagePageName": "{base}-sayfa-{page}.png",
 
     "merge.title": "PDF Birleştirici",
     "merge.planFree": "Ücretsiz plan: en fazla {files} PDF, dosya başına {limit} MB. Daha fazlası için sağ üstten Premium'a geçebilirsiniz.",
@@ -124,6 +128,19 @@ const DICT = {
     "merge.errTooLargeExtra": " (Premium'da sınır 200 MB'a çıkar)",
     "merge.errInvalidPdf": "Dosyalardan biri geçerli bir PDF değil.",
     "merge.errUnknown": "Bilinmeyen bir hata oluştu",
+
+    "table.title": "Excel/CSV Dönüştürücü",
+    "table.direction": "Yön",
+    "table.planFree": "Ücretsiz plan: dosya başına {limit} MB sınırı. Daha fazlası için sağ üstten Premium'a geçebilirsiniz.",
+    "table.planPremium": "✦ Premium plan: dosya başına {limit} MB sınırı.",
+    "table.dropFile": "Dosya seçmek için tıklayın",
+    "table.convert": "Dönüştür",
+    "table.converting": "Dönüştürülüyor…",
+    "table.download": "⬇ {name} dosyasını indir",
+    "table.csvSheetName": "{base}-{sheet}.csv",
+    "table.errTooLarge": "\"{name}\" dosyası {limit} MB sınırını aşıyor{extra}.",
+    "table.errTooLargeExtra": " (Premium'da sınır 200 MB'a çıkar)",
+    "table.errUnknown": "Bilinmeyen bir hata oluştu",
   },
   en: {
     "nav.signIn": "Sign in",
@@ -144,6 +161,8 @@ const DICT = {
     "home.tool.doc.desc": "Convert between DOCX, TXT, PDF and Markdown formats",
     "home.tool.merge.title": "PDF Merger",
     "home.tool.merge.desc": "Combine multiple PDF files into a single document",
+    "home.tool.table.title": "Excel/CSV Converter",
+    "home.tool.table.desc": "Convert between XLSX and CSV formats",
     "home.open": "Open →",
     "home.plan.free.title": "Free Plan",
     "home.plan.free.item1": "1 file at a time",
@@ -157,6 +176,7 @@ const DICT = {
     "home.plan.premium.note": "Try it out with the \"Go Premium\" button in the top right.",
 
     "back.home": "← Home",
+    "common.dragHint": "or drag and drop a file here",
 
     "image.title": "Image Converter",
     "image.planFree": "Free plan: 1 file at a time, {limit} MB per file. Switch to Premium from the top right for more.",
@@ -191,6 +211,7 @@ const DICT = {
     "doc.errUnknown": "An unknown error occurred",
     "doc.errTooLarge": "\"{name}\" exceeds the {limit} MB limit{extra}.",
     "doc.errTooLargeExtra": " (Premium raises the limit to 200 MB)",
+    "doc.pdfImagePageName": "{base}-page-{page}.png",
 
     "merge.title": "PDF Merger",
     "merge.planFree": "Free plan: up to {files} PDFs, {limit} MB per file. Switch to Premium from the top right for more.",
@@ -212,6 +233,19 @@ const DICT = {
     "merge.errTooLargeExtra": " (Premium raises the limit to 200 MB)",
     "merge.errInvalidPdf": "One of the files is not a valid PDF.",
     "merge.errUnknown": "An unknown error occurred",
+
+    "table.title": "Excel/CSV Converter",
+    "table.direction": "Direction",
+    "table.planFree": "Free plan: {limit} MB limit per file. Switch to Premium from the top right for more.",
+    "table.planPremium": "✦ Premium plan: {limit} MB limit per file.",
+    "table.dropFile": "Click to select a file",
+    "table.convert": "Convert",
+    "table.converting": "Converting…",
+    "table.download": "⬇ Download {name}",
+    "table.csvSheetName": "{base}-{sheet}.csv",
+    "table.errTooLarge": "\"{name}\" exceeds the {limit} MB limit{extra}.",
+    "table.errTooLargeExtra": " (Premium raises the limit to 200 MB)",
+    "table.errUnknown": "An unknown error occurred",
 
     "footer.privacy": "Privacy Policy",
     "footer.rights": "All rights reserved.",

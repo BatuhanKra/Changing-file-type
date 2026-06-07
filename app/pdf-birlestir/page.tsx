@@ -38,9 +38,9 @@ export default function PdfMerger() {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(e.target.files ?? []);
+  function processFiles(selected: File[]) {
     setResult(null);
     setError(null);
 
@@ -73,6 +73,18 @@ export default function PdfMerger() {
     }
 
     setFiles(selected);
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    processFiles(Array.from(e.target.files ?? []));
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    setDragOver(false);
+    processFiles(
+      Array.from(e.dataTransfer.files ?? []).filter((f) => f.type === "application/pdf")
+    );
   }
 
   function moveFile(index: number, dir: -1 | 1) {
@@ -138,7 +150,19 @@ export default function PdfMerger() {
               : t("merge.planFree", { files: maxMergeFiles, limit: limits.maxSizeMb })}
           </p>
 
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-card-border bg-background/40 px-4 py-8 text-center transition-colors hover:border-accent/50">
+          <label
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
+              dragOver
+                ? "border-accent bg-accent-soft"
+                : "border-card-border bg-background/40 hover:border-accent/50"
+            }`}
+          >
             <span className="text-2xl">📤</span>
             <span className="text-sm font-medium text-foreground">
               {files.length > 0
@@ -146,6 +170,7 @@ export default function PdfMerger() {
                 : t("merge.selectFiles")}
             </span>
             <span className="text-xs text-foreground/50">{t("merge.dropHint")}</span>
+            <span className="text-xs text-foreground/40">{t("common.dragHint")}</span>
             <input
               type="file"
               accept="application/pdf"

@@ -84,9 +84,9 @@ export default function ImageConverter() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [combineIntoPdf, setCombineIntoPdf] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(e.target.files ?? []);
+  function processFiles(selected: File[]) {
     setResults([]);
     setError(null);
 
@@ -119,6 +119,16 @@ export default function ImageConverter() {
     }
 
     setFiles(selected);
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    processFiles(Array.from(e.target.files ?? []));
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    setDragOver(false);
+    processFiles(Array.from(e.dataTransfer.files ?? []).filter((f) => f.type.startsWith("image/")));
   }
 
   async function convert() {
@@ -195,7 +205,19 @@ export default function ImageConverter() {
               : t("image.planFree", { limit: limits.maxSizeMb })}
           </p>
 
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-card-border bg-background/40 px-4 py-8 text-center transition-colors hover:border-accent/50">
+          <label
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
+              dragOver
+                ? "border-accent bg-accent-soft"
+                : "border-card-border bg-background/40 hover:border-accent/50"
+            }`}
+          >
             <span className="text-2xl">📤</span>
             <span className="text-sm font-medium text-foreground">
               {files.length > 0 ? t("image.selectedCount", { count: files.length }) : t("image.selectFile")}
@@ -203,6 +225,7 @@ export default function ImageConverter() {
             <span className="text-xs text-foreground/50">
               {premium ? t("image.dropMulti") : t("image.dropSingle")}
             </span>
+            <span className="text-xs text-foreground/40">{t("common.dragHint")}</span>
             <input
               type="file"
               accept="image/*"
