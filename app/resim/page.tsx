@@ -41,7 +41,7 @@ async function convertToPdf(file: File): Promise<Blob> {
   const pngBlob: Blob | null = await new Promise((resolve) =>
     canvas.toBlob(resolve, "image/png")
   );
-  if (!pngBlob) throw new Error("Dönüşüm başarısız oldu");
+  if (!pngBlob) throw new Error("CONVERT_FAILED");
 
   const doc = await PDFDocument.create();
   const pngBytes = await pngBlob.arrayBuffer();
