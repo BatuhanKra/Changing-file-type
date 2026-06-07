@@ -52,6 +52,27 @@ async function convertToPdf(file: File): Promise<Blob> {
   return new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
 }
 
+async function combineImagesToPdf(files: File[]): Promise<Blob> {
+  const { PDFDocument } = await import("pdf-lib");
+  const doc = await PDFDocument.create();
+
+  for (const file of files) {
+    const canvas = await imageFileToCanvas(file);
+    const pngBlob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/png")
+    );
+    if (!pngBlob) throw new Error("CONVERT_FAILED");
+
+    const pngBytes = await pngBlob.arrayBuffer();
+    const image = await doc.embedPng(pngBytes);
+    const page = doc.addPage([image.width, image.height]);
+    page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+  }
+
+  const bytes = await doc.save();
+  return new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
+}
+
 export default function ImageConverter() {
   const { premium } = useRealPremium();
   const limits = limitsFor(premium);
@@ -62,6 +83,7 @@ export default function ImageConverter() {
   const [results, setResults] = useState<Result[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [combineIntoPdf, setCombineIntoPdf] = useState(false);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
@@ -107,18 +129,28 @@ export default function ImageConverter() {
 
     const format = FORMATS.find((f) => f.value === targetFormat)!;
     const newResults: Result[] = [];
+    const shouldCombine =
+      targetFormat === "application/pdf" && combineIntoPdf && premium && files.length > 1;
 
     try {
-      for (const file of files) {
-        const blob =
-          targetFormat === "application/pdf"
-            ? await convertToPdf(file)
-            : await convertToImage(file, targetFormat);
-        const baseName = file.name.replace(/\.[^/.]+$/, "");
+      if (shouldCombine) {
+        const blob = await combineImagesToPdf(files);
         newResults.push({
-          name: `${baseName}.${format.ext}`,
+          name: t("image.combinedFileName"),
           url: URL.createObjectURL(blob),
         });
+      } else {
+        for (const file of files) {
+          const blob =
+            targetFormat === "application/pdf"
+              ? await convertToPdf(file)
+              : await convertToImage(file, targetFormat);
+          const baseName = file.name.replace(/\.[^/.]+$/, "");
+          newResults.push({
+            name: `${baseName}.${format.ext}`,
+            url: URL.createObjectURL(blob),
+          });
+        }
       }
       setResults(newResults);
     } catch (err) {
@@ -207,6 +239,28 @@ export default function ImageConverter() {
               ))}
             </select>
           </div>
+
+          {targetFormat === "application/pdf" && files.length > 1 && (
+            <label
+              className={`flex items-center gap-2 text-sm ${
+                premium ? "cursor-pointer text-foreground/70" : "cursor-not-allowed text-foreground/40"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={combineIntoPdf}
+                disabled={!premium}
+                onChange={(e) => setCombineIntoPdf(e.target.checked)}
+                className="h-4 w-4 rounded border-card-border accent-accent"
+              />
+              {t("image.combineIntoPdf")}
+              {!premium && (
+                <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                  {t("nav.premiumBadge")}
+                </span>
+              )}
+            </label>
+          )}
 
           <button
             onClick={convert}

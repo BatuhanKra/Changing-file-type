@@ -19,6 +19,12 @@ export default function Home() {
       title: t("home.tool.doc.title"),
       description: t("home.tool.doc.desc"),
     },
+    {
+      href: "/pdf-birlestir",
+      icon: "🧩",
+      title: t("home.tool.merge.title"),
+      description: t("home.tool.merge.desc"),
+    },
   ];
 
   return (
