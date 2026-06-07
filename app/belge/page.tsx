@@ -366,7 +366,7 @@ export default function DocumentConverter() {
         setResultUrl(URL.createObjectURL(blob));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu");
+      setError(err instanceof Error ? err.message : t("doc.errUnknown"));
     } finally {
       setBusy(false);
     }
@@ -399,8 +399,8 @@ export default function DocumentConverter() {
             }
           >
             {premium
-              ? `✦ Premium plan: dosya başına ${limits.maxSizeMb} MB sınırı.`
-              : `Ücretsiz plan: dosya başına ${limits.maxSizeMb} MB sınırı. Daha fazlası için sağ üstten Premium'a geçebilirsiniz.`}
+              ? t("doc.planPremium", { limit: limits.maxSizeMb })
+              : t("doc.planFree", { limit: limits.maxSizeMb })}
           </p>
 
           <div className="flex items-center gap-3">
@@ -428,7 +428,7 @@ export default function DocumentConverter() {
             <span className="text-sm font-medium text-foreground">
               {file ? file.name : t("doc.dropFile")}
             </span>
-            <span className="text-xs text-foreground/50">{accept.toUpperCase()} dosyası</span>
+            <span className="text-xs text-foreground/50">{t("doc.fileType", { ext: accept.toUpperCase() })}</span>
             <input
               key={direction}
               type="file"
@@ -443,7 +443,7 @@ export default function DocumentConverter() {
             disabled={!file || busy}
             className="rounded-full bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? "Dönüştürülüyor…" : "Dönüştür"}
+            {busy ? t("doc.converting") : t("doc.convert")}
           </button>
 
           {error && (
@@ -458,7 +458,7 @@ export default function DocumentConverter() {
               download={resultName}
               className="flex items-center justify-center gap-2 rounded-full border border-accent/30 bg-accent-soft px-5 py-3 text-center text-sm font-medium text-accent transition-colors hover:bg-accent/15"
             >
-              ⬇ {resultName} dosyasını indir
+              {t("doc.download", { name: resultName })}
             </a>
           )}
         </div>
