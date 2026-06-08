@@ -259,60 +259,62 @@ export default function DocumentConverter() {
         const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         return [{ name: `${baseName}.txt`, url: URL.createObjectURL(blob) }];
       } else if (direction === "docx-to-pdf") {
-        // Convert DOCX → HTML via mammoth, then render to PDF via html2canvas + jsPDF
+        // DOCX → plain text via mammoth → PDF via pdf-lib (reliable, no canvas/visibility issues)
         const mammoth = await import("mammoth");
-        const { default: html2canvas } = await import("html2canvas");
-        const { jsPDF } = await import("jspdf");
+        const { PDFDocument, rgb } = await import("pdf-lib");
+        const fontkit = (await import("@pdf-lib/fontkit")).default;
 
         const arrayBuffer = await file.arrayBuffer();
-        const { value: bodyHtml } = await mammoth.convertToHtml({ arrayBuffer });
+        const { value: text } = await mammoth.extractRawText({ arrayBuffer });
 
-        // Render in a hidden off-screen container
-        const container = document.createElement("div");
-        container.style.cssText =
-          "position:fixed;top:0;left:0;width:794px;padding:60px;background:#fff;color:#000;font-family:serif;font-size:12pt;line-height:1.6;z-index:-1;visibility:hidden;";
-        container.innerHTML = bodyHtml;
-        document.body.appendChild(container);
+        const doc = await PDFDocument.create();
+        doc.registerFontkit(fontkit);
+        const fontBytes = await fetch("/fonts/LiberationSans-Regular.ttf").then((r) =>
+          r.arrayBuffer()
+        );
+        const font = await doc.embedFont(fontBytes);
+        const fontSize = 12;
+        const lineHeight = fontSize * 1.5;
+        const margin = 60;
 
-        try {
-          const canvas = await html2canvas(container, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-          });
+        let page = doc.addPage();
+        let { width, height } = page.getSize();
+        let y = height - margin;
 
-          const imgData = canvas.toDataURL("image/png");
-          const A4_W = 210; // mm
-          const A4_H = 297; // mm
-          const marginMm = 10;
-          const contentW = A4_W - marginMm * 2;
-          const pxPerMm = canvas.width / (contentW + marginMm * 2);
-          const contentH = canvas.height / pxPerMm;
-          const pageH = A4_H - marginMm * 2;
-          const pages = Math.ceil(contentH / pageH);
-
-          const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-          for (let p = 0; p < pages; p++) {
-            if (p > 0) pdf.addPage();
-            // Clip each page's slice
-            const srcY = p * pageH * pxPerMm;
-            const srcH = Math.min(pageH * pxPerMm, canvas.height - srcY);
-            const slice = document.createElement("canvas");
-            slice.width = canvas.width;
-            slice.height = srcH;
-            const sliceCtx = slice.getContext("2d");
-            if (!sliceCtx) throw new Error("CANVAS_ERROR");
-            sliceCtx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-            const sliceData = slice.toDataURL("image/png");
-            const sliceHmm = (srcH / pxPerMm);
-            pdf.addImage(sliceData, "PNG", marginMm, marginMm, contentW, sliceHmm);
+        for (const rawLine of text.split(/\r?\n/)) {
+          // Word-wrap long lines
+          const words = rawLine.split(" ");
+          let currentLine = "";
+          for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+            const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+            if (testWidth > width - margin * 2 && currentLine) {
+              if (y < margin) {
+                page = doc.addPage();
+                ({ width, height } = page.getSize());
+                y = height - margin;
+              }
+              page.drawText(currentLine, { x: margin, y, size: fontSize, font, color: rgb(0, 0, 0) });
+              y -= lineHeight;
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
           }
-
-          const pdfBlob = pdf.output("blob");
-          return [{ name: `${baseName}.pdf`, url: URL.createObjectURL(pdfBlob) }];
-        } finally {
-          document.body.removeChild(container);
+          if (y < margin) {
+            page = doc.addPage();
+            ({ width, height } = page.getSize());
+            y = height - margin;
+          }
+          if (currentLine) {
+            page.drawText(currentLine, { x: margin, y, size: fontSize, font, color: rgb(0, 0, 0) });
+          }
+          y -= lineHeight;
         }
+
+        const bytes = await doc.save();
+        const blob = new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
+        return [{ name: `${baseName}.pdf`, url: URL.createObjectURL(blob) }];
       } else if (direction === "txt-to-docx") {
         const { Document, Packer, Paragraph } = await import("docx");
         const text = await file.text();
