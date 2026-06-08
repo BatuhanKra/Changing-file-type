@@ -107,6 +107,10 @@ const DICT = {
     "doc.errTooLarge": "\"{name}\" dosyası {limit} MB sınırını aşıyor{extra}.",
     "doc.errTooLargeExtra": " (Premium'da sınır 200 MB'a çıkar)",
     "doc.pdfImagePageName": "{base}-sayfa-{page}.png",
+    "doc.selectedCount": "{count} dosya seçildi",
+    "doc.progress": "{done}/{total} dönüştürülüyor…",
+    "doc.downloadAll": "⬇ Tümünü ZIP olarak indir",
+    "doc.errFile": "\"{name}\": {msg}",
 
     "merge.title": "PDF Birleştirici",
     "merge.planFree": "Ücretsiz plan: en fazla {files} PDF, dosya başına {limit} MB. Daha fazlası için sağ üstten Premium'a geçebilirsiniz.",
@@ -212,6 +216,10 @@ const DICT = {
     "doc.errTooLarge": "\"{name}\" exceeds the {limit} MB limit{extra}.",
     "doc.errTooLargeExtra": " (Premium raises the limit to 200 MB)",
     "doc.pdfImagePageName": "{base}-page-{page}.png",
+    "doc.selectedCount": "{count} files selected",
+    "doc.progress": "Converting {done}/{total}…",
+    "doc.downloadAll": "⬇ Download all as ZIP",
+    "doc.errFile": "\"{name}\": {msg}",
 
     "merge.title": "PDF Merger",
     "merge.planFree": "Free plan: up to {files} PDFs, {limit} MB per file. Switch to Premium from the top right for more.",

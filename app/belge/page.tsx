@@ -209,49 +209,47 @@ export default function DocumentConverter() {
   const { t } = useLanguage();
 
   const [direction, setDirection] = useState<Direction>("docx-to-txt");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [results, setResults] = useState<{ name: string; url: string }[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  function processFile(selected: File | null) {
+  function processFiles(selected: File[]) {
     setResults([]);
-    setError(null);
-
-    if (selected && selected.size > limits.maxSizeMb * 1024 * 1024) {
-      setFile(null);
-      setError(
-        t("doc.errTooLarge", {
-          name: selected.name,
-          limit: limits.maxSizeMb,
-          extra: premium ? "" : t("doc.errTooLargeExtra"),
-        })
-      );
-      return;
+    setErrors([]);
+    const maxBytes = limits.maxSizeMb * 1024 * 1024;
+    const valid: File[] = [];
+    const errs: string[] = [];
+    for (const f of selected) {
+      if (f.size > maxBytes) {
+        errs.push(
+          t("doc.errTooLarge", {
+            name: f.name,
+            limit: limits.maxSizeMb,
+            extra: premium ? "" : t("doc.errTooLargeExtra"),
+          })
+        );
+      } else {
+        valid.push(f);
+      }
     }
-
-    setFile(selected);
+    setFiles(valid);
+    if (errs.length > 0) setErrors(errs);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    processFile(e.target.files?.[0] ?? null);
+    processFiles(Array.from(e.target.files ?? []));
   }
 
   function handleDrop(e: React.DragEvent<HTMLLabelElement>) {
     e.preventDefault();
     setDragOver(false);
-    const dropped = e.dataTransfer.files?.[0] ?? null;
-    if (dropped) processFile(dropped);
+    processFiles(Array.from(e.dataTransfer.files ?? []));
   }
 
-  async function convert() {
-    if (!file) return;
-    setBusy(true);
-    setError(null);
-    setResults([]);
-
-    try {
+  async function convertOne(file: File): Promise<{ name: string; url: string }[]> {
       const baseName = file.name.replace(/\.[^/.]+$/, "");
 
       if (direction === "docx-to-txt") {
@@ -259,7 +257,7 @@ export default function DocumentConverter() {
         const arrayBuffer = await file.arrayBuffer();
         const { value: text } = await mammoth.extractRawText({ arrayBuffer });
         const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-        setResults([{ name: `${baseName}.txt`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.txt`, url: URL.createObjectURL(blob) }];
       } else if (direction === "docx-to-pdf") {
         // Convert DOCX → HTML via mammoth, then render to PDF via html2canvas + jsPDF
         const mammoth = await import("mammoth");
@@ -311,7 +309,7 @@ export default function DocumentConverter() {
           }
 
           const pdfBlob = pdf.output("blob");
-          setResults([{ name: `${baseName}.pdf`, url: URL.createObjectURL(pdfBlob) }]);
+          return [{ name: `${baseName}.pdf`, url: URL.createObjectURL(pdfBlob) }];
         } finally {
           document.body.removeChild(container);
         }
@@ -328,13 +326,13 @@ export default function DocumentConverter() {
           ],
         });
         const blob = await Packer.toBlob(doc);
-        setResults([{ name: `${baseName}.docx`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.docx`, url: URL.createObjectURL(blob) }];
       } else if (direction === "pdf-to-txt") {
         const pageTexts = await extractPdfPageTexts(file);
         const blob = new Blob([pageTexts.join("\n\n")], {
           type: "text/plain;charset=utf-8",
         });
-        setResults([{ name: `${baseName}.txt`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.txt`, url: URL.createObjectURL(blob) }];
       } else if (direction === "pdf-to-md") {
         const pageTexts = await extractPdfPageTexts(file);
         const markdown = pageTexts
@@ -343,7 +341,7 @@ export default function DocumentConverter() {
         const blob = new Blob([markdown], {
           type: "text/markdown;charset=utf-8",
         });
-        setResults([{ name: `${baseName}.md`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.md`, url: URL.createObjectURL(blob) }];
       } else if (direction === "pdf-to-docx") {
         const { Document, Packer, Paragraph, TextRun, PageBreak, AlignmentType, HeadingLevel } =
           await import("docx");
@@ -390,7 +388,7 @@ export default function DocumentConverter() {
 
         const doc = new Document({ sections: [{ children }] });
         const blob = await Packer.toBlob(doc);
-        setResults([{ name: `${baseName}.docx`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.docx`, url: URL.createObjectURL(blob) }];
       } else if (direction === "txt-to-pdf") {
         const { PDFDocument, rgb } = await import("pdf-lib");
         const fontkit = (await import("@pdf-lib/fontkit")).default;
@@ -428,7 +426,7 @@ export default function DocumentConverter() {
 
         const bytes = await doc.save();
         const blob = new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" });
-        setResults([{ name: `${baseName}.pdf`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.pdf`, url: URL.createObjectURL(blob) }];
       } else if (direction === "pdf-to-image") {
         const pdfjs = await import("pdfjs-dist");
         pdfjs.GlobalWorkerOptions.workerSrc = "/pdfjs/pdf.worker.min.mjs";
@@ -463,21 +461,21 @@ export default function DocumentConverter() {
           });
         }
 
-        setResults(pageResults);
+        return pageResults;
       } else if (direction === "html-to-md") {
         const TurndownService = (await import("turndown")).default;
         const turndown = new TurndownService({ headingStyle: "atx" });
         const html = await file.text();
         const markdown = turndown.turndown(html);
         const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
-        setResults([{ name: `${baseName}.md`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.md`, url: URL.createObjectURL(blob) }];
       } else if (direction === "md-to-html") {
         const { marked } = await import("marked");
         const markdown = await file.text();
         const body = await marked.parse(markdown);
         const html = `<!DOCTYPE html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n<title>${baseName}</title>\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
         const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-        setResults([{ name: `${baseName}.html`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.html`, url: URL.createObjectURL(blob) }];
       } else if (direction === "md-to-docx") {
         const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import("docx");
         const markdown = await file.text();
@@ -546,13 +544,40 @@ export default function DocumentConverter() {
           sections: [{ children: paragraphs }],
         });
         const blob = await Packer.toBlob(doc);
-        setResults([{ name: `${baseName}.docx`, url: URL.createObjectURL(blob) }]);
+        return [{ name: `${baseName}.docx`, url: URL.createObjectURL(blob) }];
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("doc.errUnknown"));
-    } finally {
-      setBusy(false);
+      return [];
+  }
+
+  async function convert() {
+    if (files.length === 0) return;
+    setBusy(true);
+    setErrors([]);
+    setResults([]);
+    setProgress({ done: 0, total: files.length });
+
+    const allResults: { name: string; url: string }[] = [];
+    const allErrors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      setProgress({ done: i, total: files.length });
+      try {
+        const fileResults = await convertOne(files[i]);
+        allResults.push(...fileResults);
+      } catch (err) {
+        allErrors.push(
+          t("doc.errFile", {
+            name: files[i].name,
+            msg: err instanceof Error ? err.message : t("doc.errUnknown"),
+          })
+        );
+      }
     }
+
+    setProgress(null);
+    setResults(allResults);
+    setErrors(allErrors);
+    setBusy(false);
   }
 
   const accept = DIRECTIONS.find((d) => d.value === direction)!.accept;
@@ -592,9 +617,9 @@ export default function DocumentConverter() {
               value={direction}
               onChange={(e) => {
                 setDirection(e.target.value as Direction);
-                setFile(null);
+                setFiles([]);
                 setResults([]);
-                setError(null);
+                setErrors([]);
               }}
               className="rounded-lg border border-card-border bg-background px-3 py-2 text-sm text-foreground"
             >
@@ -621,7 +646,9 @@ export default function DocumentConverter() {
           >
             <span className="text-2xl">📤</span>
             <span className="text-sm font-medium text-foreground">
-              {file ? file.name : t("doc.dropFile")}
+              {files.length > 0
+                ? t("doc.selectedCount", { count: files.length })
+                : t("doc.dropFile")}
             </span>
             <span className="text-xs text-foreground/50">{t("doc.fileType", { ext: accept.toUpperCase() })}</span>
             <span className="text-xs text-foreground/40">{t("common.dragHint")}</span>
@@ -629,6 +656,7 @@ export default function DocumentConverter() {
               key={direction}
               type="file"
               accept={accept}
+              multiple
               onChange={handleFileChange}
               className="hidden"
             />
@@ -636,20 +664,47 @@ export default function DocumentConverter() {
 
           <button
             onClick={convert}
-            disabled={!file || busy}
+            disabled={files.length === 0 || busy}
             className="rounded-full bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? t("doc.converting") : t("doc.convert")}
+            {progress
+              ? t("doc.progress", { done: progress.done, total: progress.total })
+              : t("doc.convert")}
           </button>
 
-          {error && (
-            <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
-              {error}
-            </p>
+          {errors.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {errors.map((e, i) => (
+                <p key={i} className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
+                  {e}
+                </p>
+              ))}
+            </div>
           )}
 
           {results.length > 0 && (
             <div className="flex flex-col gap-2">
+              {results.length > 1 && (
+                <button
+                  onClick={async () => {
+                    const JSZip = (await import("jszip")).default;
+                    const zip = new JSZip();
+                    for (const r of results) {
+                      const resp = await fetch(r.url);
+                      const blob = await resp.blob();
+                      zip.file(r.name, blob);
+                    }
+                    const zipBlob = await zip.generateAsync({ type: "blob" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(zipBlob);
+                    a.download = "donusturuldu.zip";
+                    a.click();
+                  }}
+                  className="rounded-full bg-foreground/10 px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-foreground/15"
+                >
+                  {t("doc.downloadAll")}
+                </button>
+              )}
               {results.map((r) => (
                 <a
                   key={r.name}
