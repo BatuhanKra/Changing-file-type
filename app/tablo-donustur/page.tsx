@@ -21,80 +21,103 @@ export default function TableConverter() {
   const { t } = useLanguage();
 
   const [direction, setDirection] = useState<Direction>("xlsx-to-csv");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [results, setResults] = useState<Result[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  function processFile(selected: File | null) {
+  function processFiles(selected: File[]) {
     setResults([]);
-    setError(null);
-
-    if (selected && selected.size > limits.maxSizeMb * 1024 * 1024) {
-      setFile(null);
-      setError(
-        t("table.errTooLarge", {
-          name: selected.name,
-          limit: limits.maxSizeMb,
-          extra: premium ? "" : t("table.errTooLargeExtra"),
-        })
-      );
-      return;
+    setErrors([]);
+    const maxBytes = limits.maxSizeMb * 1024 * 1024;
+    const valid: File[] = [];
+    const errs: string[] = [];
+    for (const f of selected) {
+      if (f.size > maxBytes) {
+        errs.push(
+          t("table.errTooLarge", {
+            name: f.name,
+            limit: limits.maxSizeMb,
+            extra: premium ? "" : t("table.errTooLargeExtra"),
+          })
+        );
+      } else {
+        valid.push(f);
+      }
     }
-
-    setFile(selected);
+    setFiles(valid);
+    if (errs.length > 0) setErrors(errs);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    processFile(e.target.files?.[0] ?? null);
+    processFiles(Array.from(e.target.files ?? []));
   }
 
   function handleDrop(e: React.DragEvent<HTMLLabelElement>) {
     e.preventDefault();
     setDragOver(false);
-    const dropped = e.dataTransfer.files?.[0] ?? null;
-    if (dropped) processFile(dropped);
+    processFiles(Array.from(e.dataTransfer.files ?? []));
+  }
+
+  async function convertOne(file: File): Promise<Result[]> {
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    const XLSX = await import("xlsx");
+
+    if (direction === "xlsx-to-csv") {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      return workbook.SheetNames.map((sheetName) => {
+        const sheet = workbook.Sheets[sheetName];
+        const csv = XLSX.utils.sheet_to_csv(sheet);
+        const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+        const fileName =
+          workbook.SheetNames.length > 1
+            ? t("table.csvSheetName", { base: baseName, sheet: sheetName })
+            : `${baseName}.csv`;
+        return { name: fileName, url: URL.createObjectURL(blob) };
+      });
+    } else {
+      const text = await file.text();
+      const workbook = XLSX.read(text, { type: "string" });
+      const bytes = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+      const blob = new Blob([bytes], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      return [{ name: `${baseName}.xlsx`, url: URL.createObjectURL(blob) }];
+    }
   }
 
   async function convert() {
-    if (!file) return;
+    if (files.length === 0) return;
     setBusy(true);
-    setError(null);
+    setErrors([]);
     setResults([]);
+    setProgress({ done: 0, total: files.length });
 
-    try {
-      const baseName = file.name.replace(/\.[^/.]+$/, "");
-      const XLSX = await import("xlsx");
+    const allResults: Result[] = [];
+    const allErrors: string[] = [];
 
-      if (direction === "xlsx-to-csv") {
-        const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        const sheetResults: Result[] = workbook.SheetNames.map((sheetName) => {
-          const sheet = workbook.Sheets[sheetName];
-          const csv = XLSX.utils.sheet_to_csv(sheet);
-          const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
-          const fileName =
-            workbook.SheetNames.length > 1
-              ? t("table.csvSheetName", { base: baseName, sheet: sheetName })
-              : `${baseName}.csv`;
-          return { name: fileName, url: URL.createObjectURL(blob) };
-        });
-        setResults(sheetResults);
-      } else {
-        const text = await file.text();
-        const workbook = XLSX.read(text, { type: "string" });
-        const bytes = XLSX.write(workbook, { type: "array", bookType: "xlsx" });
-        const blob = new Blob([bytes], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        setResults([{ name: `${baseName}.xlsx`, url: URL.createObjectURL(blob) }]);
+    for (let i = 0; i < files.length; i++) {
+      setProgress({ done: i, total: files.length });
+      try {
+        const res = await convertOne(files[i]);
+        allResults.push(...res);
+      } catch (err) {
+        allErrors.push(
+          t("table.errFile", {
+            name: files[i].name,
+            msg: err instanceof Error ? err.message : t("table.errUnknown"),
+          })
+        );
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("table.errUnknown"));
-    } finally {
-      setBusy(false);
     }
+
+    setProgress(null);
+    setResults(allResults);
+    setErrors(allErrors);
+    setBusy(false);
   }
 
   const accept = DIRECTIONS.find((d) => d.value === direction)!.accept;
@@ -134,9 +157,9 @@ export default function TableConverter() {
               value={direction}
               onChange={(e) => {
                 setDirection(e.target.value as Direction);
-                setFile(null);
+                setFiles([]);
                 setResults([]);
-                setError(null);
+                setErrors([]);
               }}
               className="rounded-lg border border-card-border bg-background px-3 py-2 text-sm text-foreground"
             >
@@ -163,7 +186,9 @@ export default function TableConverter() {
           >
             <span className="text-2xl">📤</span>
             <span className="text-sm font-medium text-foreground">
-              {file ? file.name : t("table.dropFile")}
+              {files.length > 0
+                ? t("table.selectedCount", { count: files.length })
+                : t("table.dropFile")}
             </span>
             <span className="text-xs text-foreground/50">{t("doc.fileType", { ext: accept.toUpperCase() })}</span>
             <span className="text-xs text-foreground/40">{t("common.dragHint")}</span>
@@ -171,6 +196,7 @@ export default function TableConverter() {
               key={direction}
               type="file"
               accept={accept}
+              multiple
               onChange={handleFileChange}
               className="hidden"
             />
@@ -178,20 +204,47 @@ export default function TableConverter() {
 
           <button
             onClick={convert}
-            disabled={!file || busy}
+            disabled={files.length === 0 || busy}
             className="rounded-full bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? t("table.converting") : t("table.convert")}
+            {progress
+              ? t("table.progress", { done: progress.done, total: progress.total })
+              : t("table.convert")}
           </button>
 
-          {error && (
-            <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
-              {error}
-            </p>
+          {errors.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {errors.map((e, i) => (
+                <p key={i} className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
+                  {e}
+                </p>
+              ))}
+            </div>
           )}
 
           {results.length > 0 && (
             <div className="flex flex-col gap-2">
+              {results.length > 1 && (
+                <button
+                  onClick={async () => {
+                    const JSZip = (await import("jszip")).default;
+                    const zip = new JSZip();
+                    for (const r of results) {
+                      const resp = await fetch(r.url);
+                      const blob = await resp.blob();
+                      zip.file(r.name, blob);
+                    }
+                    const zipBlob = await zip.generateAsync({ type: "blob" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(zipBlob);
+                    a.download = "donusturuldu.zip";
+                    a.click();
+                  }}
+                  className="rounded-full bg-foreground/10 px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-foreground/15"
+                >
+                  {t("table.downloadAll")}
+                </button>
+              )}
               {results.map((r) => (
                 <a
                   key={r.name}

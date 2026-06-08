@@ -83,6 +83,7 @@ export default function ImageConverter() {
   const [results, setResults] = useState<Result[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [combineIntoPdf, setCombineIntoPdf] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
@@ -144,13 +145,18 @@ export default function ImageConverter() {
 
     try {
       if (shouldCombine) {
+        setProgress({ done: 0, total: 1 });
         const blob = await combineImagesToPdf(files);
         newResults.push({
           name: t("image.combinedFileName"),
           url: URL.createObjectURL(blob),
         });
+        setProgress({ done: 1, total: 1 });
       } else {
-        for (const file of files) {
+        setProgress({ done: 0, total: files.length });
+        for (let i = 0; i < files.length; i++) {
+          setProgress({ done: i, total: files.length });
+          const file = files[i];
           const blob =
             targetFormat === "application/pdf"
               ? await convertToPdf(file)
@@ -172,6 +178,7 @@ export default function ImageConverter() {
         setError(err instanceof Error ? err.message : t("image.errUnknown"));
       }
     } finally {
+      setProgress(null);
       setBusy(false);
     }
   }
@@ -290,7 +297,9 @@ export default function ImageConverter() {
             disabled={files.length === 0 || busy}
             className="rounded-full bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm shadow-accent/30 transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? t("image.converting") : t("image.convert")}
+            {progress
+              ? t("image.progress", { done: progress.done, total: progress.total })
+              : t("image.convert")}
           </button>
 
           {error && (
@@ -301,6 +310,27 @@ export default function ImageConverter() {
 
           {results.length > 0 && (
             <div className="flex flex-col gap-2">
+              {results.length > 1 && (
+                <button
+                  onClick={async () => {
+                    const JSZip = (await import("jszip")).default;
+                    const zip = new JSZip();
+                    for (const r of results) {
+                      const resp = await fetch(r.url);
+                      const blob = await resp.blob();
+                      zip.file(r.name, blob);
+                    }
+                    const zipBlob = await zip.generateAsync({ type: "blob" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(zipBlob);
+                    a.download = "donusturuldu.zip";
+                    a.click();
+                  }}
+                  className="rounded-full bg-foreground/10 px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-foreground/15"
+                >
+                  {t("image.downloadAll")}
+                </button>
+              )}
               {results.map((r) => (
                 <a
                   key={r.name}
