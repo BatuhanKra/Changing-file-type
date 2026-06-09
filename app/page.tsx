@@ -26,6 +26,12 @@ export default function Home() {
       description: t("home.tool.merge.desc"),
     },
     {
+      href: "/pdf-bol",
+      icon: "✂️",
+      title: t("home.tool.split.title"),
+      description: t("home.tool.split.desc"),
+    },
+    {
       href: "/tablo-donustur",
       icon: "📊",
       title: t("home.tool.table.title"),

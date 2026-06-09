@@ -10,8 +10,12 @@ const FORMATS = [
   { value: "image/jpeg", label: "JPG", ext: "jpg" },
   { value: "image/png", label: "PNG", ext: "png" },
   { value: "image/webp", label: "WEBP", ext: "webp" },
+  { value: "image/bmp", label: "BMP", ext: "bmp" },
+  { value: "image/x-icon", label: "ICO (favicon)", ext: "ico" },
   { value: "application/pdf", label: "PDF", ext: "pdf" },
 ];
+
+const QUALITY_FORMATS = new Set(["image/jpeg", "image/webp"]);
 
 type Result = { name: string; url: string };
 
@@ -26,10 +30,93 @@ async function imageFileToCanvas(file: File): Promise<HTMLCanvasElement> {
   return canvas;
 }
 
-async function convertToImage(file: File, mimeType: string): Promise<Blob> {
+// 24-bit uncompressed BMP from canvas pixels (bottom-up rows, BGR, padded to 4 bytes).
+function canvasToBmpBlob(canvas: HTMLCanvasElement): Blob {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("CANVAS_ERROR");
+  const { width, height } = canvas;
+  const pixels = ctx.getImageData(0, 0, width, height).data;
+
+  const rowSize = Math.ceil((width * 3) / 4) * 4;
+  const pixelDataSize = rowSize * height;
+  const fileSize = 54 + pixelDataSize;
+  const buffer = new ArrayBuffer(fileSize);
+  const view = new DataView(buffer);
+
+  // BITMAPFILEHEADER
+  view.setUint8(0, 0x42); // 'B'
+  view.setUint8(1, 0x4d); // 'M'
+  view.setUint32(2, fileSize, true);
+  view.setUint32(10, 54, true); // pixel data offset
+  // BITMAPINFOHEADER
+  view.setUint32(14, 40, true);
+  view.setInt32(18, width, true);
+  view.setInt32(22, height, true);
+  view.setUint16(26, 1, true); // planes
+  view.setUint16(28, 24, true); // bpp
+  view.setUint32(34, pixelDataSize, true);
+  view.setInt32(38, 2835, true); // 72 DPI
+  view.setInt32(42, 2835, true);
+
+  const out = new Uint8Array(buffer);
+  for (let yRow = 0; yRow < height; yRow++) {
+    const srcRow = height - 1 - yRow; // BMP stores rows bottom-up
+    let offset = 54 + yRow * rowSize;
+    for (let x = 0; x < width; x++) {
+      const i = (srcRow * width + x) * 4;
+      const alpha = pixels[i + 3] / 255;
+      // Composite transparency over white, since 24-bit BMP has no alpha.
+      out[offset++] = Math.round(pixels[i + 2] * alpha + 255 * (1 - alpha)); // B
+      out[offset++] = Math.round(pixels[i + 1] * alpha + 255 * (1 - alpha)); // G
+      out[offset++] = Math.round(pixels[i] * alpha + 255 * (1 - alpha)); // R
+    }
+  }
+  return new Blob([buffer], { type: "image/bmp" });
+}
+
+// ICO container with embedded PNG (supported by all modern Windows/browsers).
+// The image is downscaled to fit 256×256, which is the ICO maximum.
+async function canvasToIcoBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  const maxDim = Math.max(canvas.width, canvas.height);
+  let icoCanvas = canvas;
+  if (maxDim > 256) {
+    const scale = 256 / maxDim;
+    icoCanvas = document.createElement("canvas");
+    icoCanvas.width = Math.max(1, Math.round(canvas.width * scale));
+    icoCanvas.height = Math.max(1, Math.round(canvas.height * scale));
+    const ctx = icoCanvas.getContext("2d");
+    if (!ctx) throw new Error("CANVAS_ERROR");
+    ctx.drawImage(canvas, 0, 0, icoCanvas.width, icoCanvas.height);
+  }
+
+  const pngBlob: Blob | null = await new Promise((resolve) =>
+    icoCanvas.toBlob(resolve, "image/png")
+  );
+  if (!pngBlob) throw new Error("CONVERT_FAILED");
+  const png = new Uint8Array(await pngBlob.arrayBuffer());
+
+  const header = new ArrayBuffer(22);
+  const view = new DataView(header);
+  view.setUint16(0, 0, true); // reserved
+  view.setUint16(2, 1, true); // type: icon
+  view.setUint16(4, 1, true); // image count
+  view.setUint8(6, icoCanvas.width >= 256 ? 0 : icoCanvas.width); // 0 means 256
+  view.setUint8(7, icoCanvas.height >= 256 ? 0 : icoCanvas.height);
+  view.setUint8(9, 0); // reserved
+  view.setUint16(10, 1, true); // color planes
+  view.setUint16(12, 32, true); // bpp
+  view.setUint32(14, png.length, true);
+  view.setUint32(18, 22, true); // data offset
+
+  return new Blob([header, png], { type: "image/x-icon" });
+}
+
+async function convertToImage(file: File, mimeType: string, quality: number): Promise<Blob> {
   const canvas = await imageFileToCanvas(file);
+  if (mimeType === "image/bmp") return canvasToBmpBlob(canvas);
+  if (mimeType === "image/x-icon") return canvasToIcoBlob(canvas);
   const blob: Blob | null = await new Promise((resolve) =>
-    canvas.toBlob(resolve, mimeType, 0.92)
+    canvas.toBlob(resolve, mimeType, quality)
   );
   if (!blob) throw new Error("CONVERT_FAILED");
   return blob;
@@ -85,6 +172,7 @@ export default function ImageConverter() {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [combineIntoPdf, setCombineIntoPdf] = useState(false);
+  const [quality, setQuality] = useState(92);
   const [dragOver, setDragOver] = useState(false);
 
   function processFiles(selected: File[]) {
@@ -160,7 +248,7 @@ export default function ImageConverter() {
           const blob =
             targetFormat === "application/pdf"
               ? await convertToPdf(file)
-              : await convertToImage(file, targetFormat);
+              : await convertToImage(file, targetFormat, quality / 100);
           const baseName = file.name.replace(/\.[^/.]+$/, "");
           newResults.push({
             name: `${baseName}.${format.ext}`,
@@ -269,6 +357,25 @@ export default function ImageConverter() {
               ))}
             </select>
           </div>
+
+          {QUALITY_FORMATS.has(targetFormat) && (
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-foreground/70">
+                {t("image.quality")}
+              </label>
+              <input
+                type="range"
+                min={10}
+                max={100}
+                value={quality}
+                onChange={(e) => setQuality(parseInt(e.target.value, 10))}
+                className="h-2 flex-1 cursor-pointer accent-accent"
+              />
+              <span className="w-12 text-right text-sm tabular-nums text-foreground/70">
+                %{quality}
+              </span>
+            </div>
+          )}
 
           {targetFormat === "application/pdf" && files.length > 1 && (
             <label

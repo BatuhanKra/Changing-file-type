@@ -15,8 +15,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Convertit",
-  description: "Resim ve belge dosyalarınızı tarayıcınızda, hiçbir yere yüklemeden dönüştürün.",
+  title: {
+    default: "Convertit — Ücretsiz Online Dosya Dönüştürücü | PDF, Word, Excel, Resim",
+    template: "%s | Convertit",
+  },
+  description:
+    "PDF, Word (DOCX), Excel (XLSX), CSV, Markdown, HTML, JPG, PNG ve WEBP dosyalarınızı ücretsiz dönüştürün. PDF birleştirme ve bölme araçları. Dosyalarınız hiçbir sunucuya yüklenmez — %100 tarayıcıda, %100 gizli.",
+  keywords: [
+    "dosya dönüştürücü",
+    "pdf dönüştürücü",
+    "word to pdf",
+    "pdf to word",
+    "pdf birleştirme",
+    "pdf bölme",
+    "excel to csv",
+    "resim dönüştürücü",
+    "jpg to png",
+    "ücretsiz dönüştürücü",
+    "online converter",
+    "file converter",
+  ],
+  openGraph: {
+    title: "Convertit — Ücretsiz Online Dosya Dönüştürücü",
+    description:
+      "PDF, Word, Excel, resim ve daha fazlasını tarayıcınızda dönüştürün. Dosyalarınız asla sunucuya yüklenmez.",
+    type: "website",
+    locale: "tr_TR",
+    siteName: "Convertit",
+  },
+  twitter: {
+    card: "summary",
+    title: "Convertit — Ücretsiz Online Dosya Dönüştürücü",
+    description:
+      "PDF, Word, Excel, resim ve daha fazlasını tarayıcınızda dönüştürün. %100 gizli.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -26,7 +59,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="tr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
