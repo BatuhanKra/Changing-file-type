@@ -58,6 +58,17 @@ export default function Home() {
             <p className="max-w-md text-lg leading-7 text-foreground/60">
               {t("home.subtitle")}
             </p>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-foreground/50">
+              <span className="flex items-center gap-1.5">
+                <span className="text-accent">⚡</span> {t("home.trust.directions")}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-accent">🔒</span> {t("home.trust.browser")}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-accent">✓</span> {t("home.trust.free")}
+              </span>
+            </div>
           </div>
 
           <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2">
@@ -118,14 +129,52 @@ export default function Home() {
               <p className="text-xs text-foreground/50">{t("home.plan.premium.note")}</p>
             </div>
           </div>
-        </main>
 
-        <footer className="flex w-full max-w-3xl flex-col items-center gap-2 px-6 pb-10 text-xs text-foreground/40 sm:flex-row sm:justify-between">
-          <span>© {new Date().getFullYear()} Convertit · {t("footer.rights")}</span>
-          <Link href="/gizlilik" className="transition-colors hover:text-accent">
-            {t("footer.privacy")}
-          </Link>
-        </footer>
+          <section className="flex w-full flex-col gap-6">
+            <h2 className="text-center text-2xl font-semibold tracking-tight text-foreground">
+              {t("home.how.title")}
+            </h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {([1, 2, 3] as const).map((step) => (
+                <div
+                  key={step}
+                  className="flex flex-col gap-2 rounded-2xl border border-card-border bg-card p-6"
+                >
+                  <span className="text-base font-semibold text-foreground">
+                    {t(`home.how.step${step}.title`)}
+                  </span>
+                  <p className="text-sm leading-6 text-foreground/60">
+                    {t(`home.how.step${step}.body`)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="flex w-full flex-col gap-6">
+            <h2 className="text-center text-2xl font-semibold tracking-tight text-foreground">
+              {t("home.faq.title")}
+            </h2>
+            <div className="flex flex-col gap-3">
+              {([1, 2, 3, 4, 5, 6] as const).map((n) => (
+                <details
+                  key={n}
+                  className="group rounded-2xl border border-card-border bg-card px-6 py-4 transition-colors open:border-accent/30"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
+                    {t(`home.faq.q${n}`)}
+                    <span className="text-foreground/40 transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-6 text-foreground/60">
+                    {t(`home.faq.a${n}`)}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
+        </main>
       </div>
     </div>
   );

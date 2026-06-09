@@ -48,6 +48,94 @@ const DICT = {
 
     "footer.privacy": "Gizlilik Politikası",
     "footer.rights": "Tüm hakları saklıdır.",
+    "footer.tagline":
+      "Dosyalarınızı tarayıcınızdan çıkmadan dönüştürün. Hiçbir dosya sunucuya yüklenmez.",
+    "footer.toolsTitle": "Araçlar",
+    "footer.companyTitle": "Kurumsal",
+    "footer.about": "Hakkımızda",
+    "footer.contact": "İletişim",
+    "footer.terms": "Kullanım Koşulları",
+
+    "home.trust.directions": "29+ dönüşüm yönü",
+    "home.trust.browser": "%100 tarayıcıda çalışır",
+    "home.trust.free": "Ücretsiz ve kayıt gerektirmez",
+
+    "home.how.title": "Nasıl çalışır?",
+    "home.how.step1.title": "1. Dosyanızı seçin",
+    "home.how.step1.body":
+      "Dönüştürmek istediğiniz dosyayı tıklayarak seçin veya sürükleyip bırakın. PDF, Word, Excel, resim ve daha birçok format desteklenir.",
+    "home.how.step2.title": "2. Hedef formatı belirleyin",
+    "home.how.step2.body":
+      "Kaynak format otomatik algılanır. Tek yapmanız gereken dosyanızın hangi formata dönüşeceğini seçmek.",
+    "home.how.step3.title": "3. Dönüştürün ve indirin",
+    "home.how.step3.body":
+      "Dönüşüm saniyeler içinde cihazınızda tamamlanır. Sonucu tek tek veya ZIP arşivi olarak indirebilirsiniz.",
+
+    "home.faq.title": "Sık Sorulan Sorular",
+    "home.faq.q1": "Dosyalarım sunucuya yükleniyor mu?",
+    "home.faq.a1":
+      "Hayır. Convertit'i farklı kılan tam olarak bu: tüm dönüşümler tarayıcınızın içinde, kendi cihazınızda gerçekleşir. Dosyalarınız internet üzerinden hiçbir sunucuya gönderilmez, bizim tarafımızdan görülmez ve saklanmaz.",
+    "home.faq.q2": "Hangi formatlar destekleniyor?",
+    "home.faq.a2":
+      "Belge tarafında PDF, Word (DOCX), TXT, Markdown ve HTML — her format diğer tüm formatlara dönüştürülebilir. Resim tarafında JPG, PNG, WEBP, BMP, ICO ve PDF. Tablo tarafında Excel (XLSX) ve CSV. Ayrıca PDF birleştirme ve bölme araçları da mevcut.",
+    "home.faq.q3": "Gerçekten ücretsiz mi?",
+    "home.faq.a3":
+      "Evet. Temel kullanım tamamen ücretsizdir ve kayıt gerektirmez. Daha büyük dosyalar (200 MB'a kadar) ve aynı anda 10 dosyaya kadar toplu dönüşüm isteyenler için Premium plan sunuyoruz.",
+    "home.faq.q4": "Dosya boyutu sınırı nedir?",
+    "home.faq.a4":
+      "Ücretsiz planda dosya başına 15 MB, Premium planda 200 MB sınırı vardır. Dönüşüm cihazınızda gerçekleştiği için hız, internet bağlantınızdan değil cihazınızın gücünden gelir.",
+    "home.faq.q5": "İnternet bağlantısı kesilirse ne olur?",
+    "home.faq.a5":
+      "Sayfa yüklendikten sonra dönüşüm motoru tamamen tarayıcınızda çalıştığı için, dönüşüm sırasında bağlantınız kesilse bile işleminiz etkilenmez.",
+    "home.faq.q6": "Dönüştürülen dosyaların kalitesi nasıl?",
+    "home.faq.a6":
+      "PDF çıktılarında seçilebilir gerçek metin üretiriz (görüntü değil). PDF'ten Word'e geçerken başlıklar, kalın/italik biçimler ve hizalamalar korunmaya çalışılır. Resimlerde JPG ve WEBP için kalite ayarı sunarız.",
+
+    "about.title": "Hakkımızda",
+    "about.intro":
+      "Convertit, dosya dönüştürmenin gizlilikten ödün vermeden de mümkün olduğunu kanıtlamak için kuruldu.",
+    "about.p1":
+      "Geleneksel online dönüştürücüler dosyalarınızı kendi sunucularına yükler, orada işler ve size geri gönderir. Bu süreçte dosyalarınızın kopyaları yabancı sunucularda dolaşır; ne kadar süre saklandığını, kimlerin erişebildiğini bilemezsiniz. Özel belgeler, sözleşmeler, kimlik fotokopileri için bu ciddi bir risktir.",
+    "about.p2":
+      "Convertit bu sorunu kökünden çözer: dönüşüm motorumuz tamamen tarayıcınızın içinde çalışır. Dosyanız cihazınızdan asla çıkmaz. Biz dahil hiç kimse dosyalarınızı göremez — çünkü teknik olarak bize hiç ulaşmazlar.",
+    "about.p3":
+      "PDF, Word, Excel, Markdown, HTML ve resim formatları arasında dönüşüm; PDF birleştirme ve bölme; toplu dönüştürme ve ZIP indirme gibi araçların tamamını modern web teknolojileriyle, ücretsiz olarak sunuyoruz.",
+    "about.whyTitle": "Neden Convertit?",
+    "about.why1": "Dosyalarınız asla sunucuya yüklenmez — %100 yerel işlem",
+    "about.why2": "Kayıt zorunluluğu yok, temel kullanım tamamen ücretsiz",
+    "about.why3": "Her belge formatı diğer tüm formatlara dönüşür",
+    "about.why4": "Açık ve dürüst fiyatlandırma: tek Premium plan, gizli ücret yok",
+
+    "contact.title": "İletişim",
+    "contact.intro":
+      "Soru, öneri veya geri bildirimleriniz için bize aşağıdaki kanallardan ulaşabilirsiniz. Genellikle 1-2 iş günü içinde yanıt veriyoruz.",
+    "contact.emailTitle": "E-posta",
+    "contact.emailBody": "Destek ve genel sorular için bize e-posta gönderin:",
+    "contact.privacyNote":
+      "Not: Dosyalarınız bize hiçbir zaman ulaşmadığı için, dosya içerikleriyle ilgili destek taleplerinde lütfen dosyanın kendisini değil, karşılaştığınız hatanın ekran görüntüsünü paylaşın.",
+
+    "terms.title": "Kullanım Koşulları",
+    "terms.updated": "Son güncelleme: 10 Haziran 2026",
+    "terms.intro":
+      "Convertit'i kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız. Lütfen dikkatlice okuyun.",
+    "terms.s1.title": "1. Hizmetin Kapsamı",
+    "terms.s1.body":
+      "Convertit, dosya dönüştürme işlemlerini kullanıcının kendi tarayıcısında gerçekleştiren ücretsiz bir web uygulamasıdır. Dosyalarınız sunucularımıza yüklenmez; bu nedenle dosyalarınızın içeriğinden ve dönüşüm sonuçlarının doğruluğundan kaynaklanan sorumluluk kullanıcıya aittir.",
+    "terms.s2.title": "2. Kabul Edilebilir Kullanım",
+    "terms.s2.body":
+      "Hizmeti yalnızca yasal amaçlarla kullanabilirsiniz. Telif hakkıyla korunan içerikleri izinsiz dönüştürmek, zararlı yazılım yaymak veya hizmetin altyapısına zarar vermeye çalışmak yasaktır.",
+    "terms.s3.title": "3. Premium Üyelik",
+    "terms.s3.body":
+      "Premium üyelik, Resmi Satıcımız (Merchant of Record) Paddle aracılığıyla satın alınır. Ödeme, faturalandırma ve iade süreçleri Paddle'ın koşullarına tabidir. Aboneliğinizi istediğiniz zaman iptal edebilirsiniz; iptal, mevcut fatura döneminin sonunda geçerli olur.",
+    "terms.s4.title": "4. Sorumluluk Reddi",
+    "terms.s4.body":
+      "Hizmet \"olduğu gibi\" sunulur. Dönüşüm sonuçlarının belirli bir amaca uygunluğu garanti edilmez. Önemli belgelerde dönüşüm sonucunu kontrol etmek kullanıcının sorumluluğundadır. Convertit, dolaylı veya doğrudan veri kaybından sorumlu tutulamaz.",
+    "terms.s5.title": "5. Değişiklikler",
+    "terms.s5.body":
+      "Bu koşullar zaman zaman güncellenebilir. Önemli değişiklikler bu sayfada duyurulur. Değişiklik sonrası hizmeti kullanmaya devam etmeniz, güncel koşulları kabul ettiğiniz anlamına gelir.",
+    "terms.s6.title": "6. İletişim",
+    "terms.s6.body":
+      "Bu koşullarla ilgili sorularınız için İletişim sayfamızdan bize ulaşabilirsiniz.",
 
     "privacy.title": "Gizlilik Politikası",
     "privacy.updated": "Son güncelleme: 8 Haziran 2026",
@@ -325,6 +413,94 @@ const DICT = {
 
     "footer.privacy": "Privacy Policy",
     "footer.rights": "All rights reserved.",
+    "footer.tagline":
+      "Convert your files without them ever leaving your browser. Nothing is uploaded to any server.",
+    "footer.toolsTitle": "Tools",
+    "footer.companyTitle": "Company",
+    "footer.about": "About",
+    "footer.contact": "Contact",
+    "footer.terms": "Terms of Use",
+
+    "home.trust.directions": "29+ conversion directions",
+    "home.trust.browser": "Runs 100% in your browser",
+    "home.trust.free": "Free, no sign-up required",
+
+    "home.how.title": "How does it work?",
+    "home.how.step1.title": "1. Pick your file",
+    "home.how.step1.body":
+      "Click to select the file you want to convert, or drag and drop it. PDF, Word, Excel, images and many more formats are supported.",
+    "home.how.step2.title": "2. Choose the target format",
+    "home.how.step2.body":
+      "The source format is detected automatically. All you have to do is choose which format your file should become.",
+    "home.how.step3.title": "3. Convert and download",
+    "home.how.step3.body":
+      "The conversion finishes on your device within seconds. Download the results one by one or as a single ZIP archive.",
+
+    "home.faq.title": "Frequently Asked Questions",
+    "home.faq.q1": "Are my files uploaded to a server?",
+    "home.faq.a1":
+      "No. This is exactly what makes Convertit different: every conversion runs inside your browser, on your own device. Your files are never sent over the internet, never seen by us, and never stored anywhere.",
+    "home.faq.q2": "Which formats are supported?",
+    "home.faq.a2":
+      "On the document side: PDF, Word (DOCX), TXT, Markdown and HTML — every format converts to every other one. On the image side: JPG, PNG, WEBP, BMP, ICO and PDF. For tables: Excel (XLSX) and CSV. There are also PDF merge and split tools.",
+    "home.faq.q3": "Is it really free?",
+    "home.faq.a3":
+      "Yes. Basic usage is completely free and requires no sign-up. For larger files (up to 200 MB) and bulk conversion of up to 10 files at once, we offer a Premium plan.",
+    "home.faq.q4": "What is the file size limit?",
+    "home.faq.a4":
+      "The free plan allows 15 MB per file, Premium raises that to 200 MB. Since conversion happens on your device, speed depends on your hardware rather than your internet connection.",
+    "home.faq.q5": "What happens if my connection drops?",
+    "home.faq.a5":
+      "Once the page has loaded, the conversion engine runs entirely in your browser — so even if your connection drops mid-conversion, your work is unaffected.",
+    "home.faq.q6": "How good is the output quality?",
+    "home.faq.a6":
+      "PDF outputs contain real selectable text (not images). When going from PDF to Word we preserve headings, bold/italic styles and alignment where possible. For images we offer a quality slider for JPG and WEBP.",
+
+    "about.title": "About Us",
+    "about.intro":
+      "Convertit was built to prove that file conversion is possible without sacrificing privacy.",
+    "about.p1":
+      "Traditional online converters upload your files to their servers, process them there and send them back. Along the way, copies of your files travel through machines you don't control; you can't know how long they're kept or who can access them. For private documents, contracts or ID scans, that's a serious risk.",
+    "about.p2":
+      "Convertit solves this at the root: our conversion engine runs entirely inside your browser. Your file never leaves your device. Nobody — including us — can see your files, because they technically never reach us.",
+    "about.p3":
+      "Conversion between PDF, Word, Excel, Markdown, HTML and image formats; PDF merging and splitting; bulk conversion with ZIP download — all of it built on modern web technology, free to use.",
+    "about.whyTitle": "Why Convertit?",
+    "about.why1": "Your files are never uploaded — 100% local processing",
+    "about.why2": "No forced sign-up, core features completely free",
+    "about.why3": "Every document format converts to every other format",
+    "about.why4": "Honest pricing: one Premium plan, no hidden fees",
+
+    "contact.title": "Contact",
+    "contact.intro":
+      "Reach us through the channels below for questions, suggestions or feedback. We usually reply within 1-2 business days.",
+    "contact.emailTitle": "Email",
+    "contact.emailBody": "For support and general questions, send us an email:",
+    "contact.privacyNote":
+      "Note: since your files never reach us, for support requests about file contents please share a screenshot of the error rather than the file itself.",
+
+    "terms.title": "Terms of Use",
+    "terms.updated": "Last updated: June 10, 2026",
+    "terms.intro":
+      "By using Convertit you agree to the terms below. Please read them carefully.",
+    "terms.s1.title": "1. Scope of the Service",
+    "terms.s1.body":
+      "Convertit is a free web application that performs file conversions inside the user's own browser. Your files are not uploaded to our servers; responsibility for file contents and for verifying conversion results therefore rests with the user.",
+    "terms.s2.title": "2. Acceptable Use",
+    "terms.s2.body":
+      "You may only use the service for lawful purposes. Converting copyrighted content without permission, distributing malware, or attempting to damage the service's infrastructure is prohibited.",
+    "terms.s3.title": "3. Premium Membership",
+    "terms.s3.body":
+      "Premium membership is purchased through our Merchant of Record, Paddle. Payment, billing and refunds are subject to Paddle's terms. You can cancel your subscription at any time; cancellation takes effect at the end of the current billing period.",
+    "terms.s4.title": "4. Disclaimer",
+    "terms.s4.body":
+      "The service is provided \"as is\". Fitness of conversion results for any particular purpose is not guaranteed. Verifying the output of important documents is the user's responsibility. Convertit cannot be held liable for direct or indirect data loss.",
+    "terms.s5.title": "5. Changes",
+    "terms.s5.body":
+      "These terms may be updated from time to time. Significant changes will be announced on this page. Continuing to use the service after a change means you accept the updated terms.",
+    "terms.s6.title": "6. Contact",
+    "terms.s6.body":
+      "For questions about these terms, you can reach us via our Contact page.",
 
     "privacy.title": "Privacy Policy",
     "privacy.updated": "Last updated: June 8, 2026",
