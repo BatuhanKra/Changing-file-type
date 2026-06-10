@@ -76,6 +76,7 @@ async function extractPdfLines(file: File): Promise<{
     str: string;
     x: number;
     y: number;
+    width: number;
     bold: boolean;
     italic: boolean;
     fontSize: number;
@@ -88,18 +89,41 @@ async function extractPdfLines(file: File): Promise<{
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     pageWidth = page.getViewport({ scale: 1 }).width;
+    // getOperatorList loads the page's fonts into commonObjs, which
+    // getTextContent alone does not — needed to resolve real font names.
+    await page.getOperatorList().catch(() => undefined);
     const content = await page.getTextContent();
+
+    // textContent's fontName is pdf.js' internal id (e.g. "g_d0_f1"); the real
+    // PostScript name (e.g. "LiberationSans-Bold") lives in the loaded font
+    // object inside commonObjs.
+    const fontNameCache = new Map<string, string>();
+    const realFontName = (id: string): string => {
+      let cached = fontNameCache.get(id);
+      if (cached === undefined) {
+        cached = id;
+        try {
+          const font = page.commonObjs.get(id) as { name?: string } | null;
+          if (font?.name) cached = font.name;
+        } catch {
+          // Font not resolved yet; fall back to the internal id.
+        }
+        fontNameCache.set(id, cached);
+      }
+      return cached;
+    };
 
     const items: Item[] = [];
     for (const raw of content.items) {
       if (!("str" in raw) || !raw.str.trim()) continue;
       const transform = raw.transform as number[];
-      const fontName: string = (raw as { fontName?: string }).fontName ?? "";
+      const fontName = realFontName((raw as { fontName?: string }).fontName ?? "");
       const fontSize = Math.hypot(transform[2], transform[3]) || 12;
       items.push({
         str: raw.str,
         x: transform[4],
         y: Math.round(transform[5]),
+        width: (raw as { width?: number }).width ?? 0,
         bold: /bold|black|heavy|semibold/i.test(fontName),
         italic: /italic|oblique/i.test(fontName),
         fontSize,
@@ -136,7 +160,11 @@ async function extractPdfLines(file: File): Promise<{
 
     for (const { items: lineItems, y } of rawLines) {
       const runs: PdfRun[] = [];
+      let prevEnd: number | null = null;
       for (const it of lineItems) {
+        // Re-insert the space pdf.js drops when words are separate draw calls.
+        const needsSpace = prevEnd !== null && it.x - prevEnd > it.fontSize * 0.15;
+        prevEnd = it.x + it.width;
         const last = runs[runs.length - 1];
         if (
           last &&
@@ -144,7 +172,7 @@ async function extractPdfLines(file: File): Promise<{
           last.italic === it.italic &&
           Math.abs(last.fontSize - it.fontSize) < 0.5
         ) {
-          last.text += it.str;
+          last.text += (needsSpace ? " " : "") + it.str;
         } else {
           runs.push({ text: it.str, bold: it.bold, italic: it.italic, fontSize: it.fontSize });
         }
@@ -296,7 +324,11 @@ async function extractPdfImagesByPage(file: File): Promise<string[][]> {
 
 async function htmlToMarkdown(html: string): Promise<string> {
   const TurndownService = (await import("turndown")).default;
-  const turndown = new TurndownService({ headingStyle: "atx" });
+  const turndown = new TurndownService({
+    headingStyle: "atx",
+    bulletListMarker: "-",
+    codeBlockStyle: "fenced",
+  });
   return turndown.turndown(html);
 }
 
@@ -322,7 +354,10 @@ async function pdfToMarkdown(file: File): Promise<string> {
           .join(" ")
           .trim();
         if (!text) return "";
-        if (level) return `${"#".repeat(level)} ${text.replace(/\*+/g, "")}`;
+        if (level) return `\n${"#".repeat(level)} ${text.replace(/\*+/g, "")}`;
+        // PDF bullet glyphs become proper Markdown list items.
+        const bullet = /^[•·▪‣◦]\s*(.+)$/.exec(text);
+        if (bullet) return `- ${bullet[1]}`;
         // Paragraph break if there was a visible vertical gap.
         return line.gapBefore > 1.5 ? `\n${text}` : text;
       })
@@ -601,6 +636,62 @@ async function buildPdfBlob(md: string): Promise<Blob> {
     }
   };
 
+  // Keeps **bold** markers, strips all other inline markdown.
+  const stripExceptBold = (text: string) =>
+    text
+      .replace(/\*\*\*([^*]+)\*\*\*/g, "**$1**")
+      .replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, "$1$2")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+
+  // Draws text with word-wrap, rendering **bold** spans with the bold font.
+  const drawRich = (rawText: string, size: number, indent = 0, baseFont = regular) => {
+    type Word = { w: string; font: typeof regular };
+    const words: Word[] = [];
+    const re = /\*\*([^*]+)\*\*/g;
+    const text = stripExceptBold(rawText);
+    let last = 0;
+    let m: RegExpExecArray | null;
+    const pushWords = (chunk: string, font: typeof regular) => {
+      for (const w of chunk.split(/\s+/)) if (w) words.push({ w, font });
+    };
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) pushWords(text.slice(last, m.index), baseFont);
+      pushWords(m[1], bold);
+      last = re.lastIndex;
+    }
+    if (last < text.length) pushWords(text.slice(last), baseFont);
+
+    if (words.length === 0) {
+      y -= size * lineGap;
+      return;
+    }
+
+    const maxWidth = width - margin * 2 - indent;
+    let line: Word[] = [];
+    let lineW = 0;
+    const flush = () => {
+      if (line.length === 0) return;
+      ensureRoom(size);
+      let x = margin + indent;
+      for (const item of line) {
+        page.drawText(item.w, { x, y, size, font: item.font, color: rgb(0.1, 0.1, 0.1) });
+        x += item.font.widthOfTextAtSize(item.w + " ", size);
+      }
+      y -= size * lineGap;
+      line = [];
+      lineW = 0;
+    };
+    for (const item of words) {
+      const itemW = item.font.widthOfTextAtSize(item.w + " ", size);
+      if (lineW + itemW > maxWidth && line.length > 0) flush();
+      line.push(item);
+      lineW += itemW;
+    }
+    flush();
+  };
+
   const drawWrapped = (
     text: string,
     font: typeof regular,
@@ -634,7 +725,10 @@ async function buildPdfBlob(md: string): Promise<Blob> {
 
   const HEADING_SIZES: Record<number, number> = { 1: 22, 2: 17, 3: 14, 4: 12, 5: 11, 6: 11 };
 
+  let listNumber = 0;
+
   for (const block of parseMarkdownBlocks(md)) {
+    if (block.kind !== "numbered") listNumber = 0;
     switch (block.kind) {
       case "blank":
         y -= bodySize * 0.8;
@@ -647,10 +741,11 @@ async function buildPdfBlob(md: string): Promise<Blob> {
         break;
       }
       case "bullet":
-        drawWrapped(`• ${stripInlineMarkdown(block.text)}`, regular, bodySize, 12);
+        drawRich(`• ${block.text}`, bodySize, 12);
         break;
       case "numbered":
-        drawWrapped(stripInlineMarkdown(block.text), regular, bodySize, 12);
+        listNumber += 1;
+        drawRich(`${listNumber}. ${block.text}`, bodySize, 12);
         break;
       case "image": {
         const img = await imageSourceToBytes(block.src);
@@ -684,7 +779,7 @@ async function buildPdfBlob(md: string): Promise<Blob> {
           y -= bodySize;
           break;
         }
-        drawWrapped(stripInlineMarkdown(block.text), regular, bodySize);
+        drawRich(block.text, bodySize);
         break;
       }
     }
