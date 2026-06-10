@@ -193,6 +193,104 @@ function headingLevelFor(fontSize: number, bodyFontSize: number): 1 | 2 | 3 | nu
 }
 
 // ---------------------------------------------------------------------------
+// PDF embedded image extraction
+// ---------------------------------------------------------------------------
+
+type PdfJsImage = {
+  width: number;
+  height: number;
+  kind?: number; // pdfjs ImageKind: 1=GRAYSCALE_1BPP, 2=RGB_24BPP, 3=RGBA_32BPP
+  data?: Uint8Array;
+  bitmap?: ImageBitmap;
+};
+
+function pdfImageToDataUrl(img: PdfJsImage): string | null {
+  const { width, height } = img;
+  if (!width || !height || width < 16 || height < 16) return null; // skip decorative specks
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  if (img.bitmap) {
+    ctx.drawImage(img.bitmap, 0, 0);
+  } else if (img.data) {
+    const imageData = ctx.createImageData(width, height);
+    const src = img.data;
+    const dst = imageData.data;
+    if (img.kind === 3) {
+      dst.set(src);
+    } else if (img.kind === 2) {
+      for (let i = 0, j = 0; j < dst.length; i += 3, j += 4) {
+        dst[j] = src[i];
+        dst[j + 1] = src[i + 1];
+        dst[j + 2] = src[i + 2];
+        dst[j + 3] = 255;
+      }
+    } else if (img.kind === 1) {
+      // 1 bit per pixel, rows padded to full bytes; set bit = white.
+      const rowBytes = Math.ceil(width / 8);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const bit = (src[y * rowBytes + (x >> 3)] >> (7 - (x & 7))) & 1;
+          const v = bit ? 255 : 0;
+          const j = (y * width + x) * 4;
+          dst[j] = dst[j + 1] = dst[j + 2] = v;
+          dst[j + 3] = 255;
+        }
+      }
+    } else {
+      return null;
+    }
+    ctx.putImageData(imageData, 0, 0);
+  } else {
+    return null;
+  }
+
+  return canvas.toDataURL("image/png");
+}
+
+async function extractPdfImagesByPage(file: File): Promise<string[][]> {
+  const pdfjs = await loadPdfjs();
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+
+  const pagesImages: string[][] = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const dataUrls: string[] = [];
+    try {
+      const opList = await page.getOperatorList();
+      const seen = new Set<string>();
+      for (let op = 0; op < opList.fnArray.length; op++) {
+        if (opList.fnArray[op] !== pdfjs.OPS.paintImageXObject) continue;
+        const name = opList.argsArray[op][0] as string;
+        if (seen.has(name)) continue;
+        seen.add(name);
+
+        const store = name.startsWith("g_") ? page.commonObjs : page.objs;
+        const img = await Promise.race<PdfJsImage | null>([
+          new Promise<PdfJsImage>((resolve) => store.get(name, resolve)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+        ]);
+        if (!img) continue;
+
+        const dataUrl = pdfImageToDataUrl(img);
+        if (dataUrl) dataUrls.push(dataUrl);
+      }
+    } catch {
+      // Image extraction is best-effort; text conversion continues regardless.
+    }
+    pagesImages.push(dataUrls);
+  }
+
+  return pagesImages;
+}
+
+// ---------------------------------------------------------------------------
 // Source → Markdown
 // ---------------------------------------------------------------------------
 
@@ -203,9 +301,13 @@ async function htmlToMarkdown(html: string): Promise<string> {
 }
 
 async function pdfToMarkdown(file: File): Promise<string> {
-  const { pages, bodyFontSize } = await extractPdfLines(file);
-  const mdPages = pages.map((lines) =>
-    lines
+  const [{ pages, bodyFontSize }, pagesImages] = await Promise.all([
+    extractPdfLines(file),
+    extractPdfImagesByPage(file),
+  ]);
+
+  const mdPages = pages.map((lines, pageIndex) => {
+    const text = lines
       .map((line) => {
         const level = headingLevelFor(line.fontSize, bodyFontSize);
         const text = line.runs
@@ -225,8 +327,13 @@ async function pdfToMarkdown(file: File): Promise<string> {
         return line.gapBefore > 1.5 ? `\n${text}` : text;
       })
       .filter((l) => l !== "")
-      .join("\n")
-  );
+      .join("\n");
+
+    // Carry the page's embedded images over as standalone image lines.
+    const images = (pagesImages[pageIndex] ?? []).map((url) => `\n![](${url})`).join("\n");
+    return text + images;
+  });
+
   return mdPages.join("\n\n---\n\n");
 }
 
@@ -256,10 +363,13 @@ type MdBlock =
   | { kind: "bullet"; text: string }
   | { kind: "numbered"; text: string }
   | { kind: "paragraph"; text: string }
+  | { kind: "image"; src: string }
   | { kind: "blank" };
 
 function parseMarkdownBlocks(md: string): MdBlock[] {
   return md.split(/\r?\n/).map((line): MdBlock => {
+    const image = /^!\[[^\]]*\]\(([^)\s]+)\)\s*$/.exec(line.trim());
+    if (image) return { kind: "image", src: image[1] };
     const heading = /^(#{1,6})\s+(.*)$/.exec(line);
     if (heading) {
       return {
@@ -277,6 +387,27 @@ function parseMarkdownBlocks(md: string): MdBlock[] {
   });
 }
 
+// Decodes a data: URL (or fetches a blob/regular URL) into raw bytes + mime.
+async function imageSourceToBytes(
+  src: string
+): Promise<{ bytes: Uint8Array; mime: string } | null> {
+  try {
+    const resp = await fetch(src);
+    const blob = await resp.blob();
+    if (!blob.type.startsWith("image/")) return null;
+    return { bytes: new Uint8Array(await blob.arrayBuffer()), mime: blob.type };
+  } catch {
+    return null;
+  }
+}
+
+async function imageDimensions(bytes: Uint8Array, mime: string) {
+  const bitmap = await createImageBitmap(new Blob([bytes.slice().buffer as ArrayBuffer], { type: mime }));
+  const dims = { width: bitmap.width, height: bitmap.height };
+  bitmap.close();
+  return dims;
+}
+
 function stripInlineMarkdown(text: string): string {
   return text
     .replace(/\*\*\*([^*]+)\*\*\*/g, "$1")
@@ -292,6 +423,7 @@ export function markdownToPlainText(md: string): string {
     .map((block) => {
       switch (block.kind) {
         case "blank":
+        case "image":
           return "";
         case "heading":
           return stripInlineMarkdown(block.text);
@@ -320,6 +452,7 @@ async function buildHtmlBlob(md: string, title: string): Promise<Blob> {
 body { max-width: 720px; margin: 2rem auto; padding: 0 1rem; font-family: Georgia, 'Times New Roman', serif; line-height: 1.7; color: #1a1a1a; }
 h1, h2, h3, h4 { font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.3; }
 code { background: #f4f4f4; padding: 0.15em 0.35em; border-radius: 4px; font-size: 0.9em; }
+img { max-width: 100%; height: auto; border-radius: 6px; }
 hr { border: none; border-top: 1px solid #ddd; margin: 2.5rem 0; }
 </style>
 </head>
@@ -332,9 +465,8 @@ ${body}
 }
 
 async function buildDocxBlob(md: string): Promise<Blob> {
-  const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import(
-    "docx"
-  );
+  const { Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType } =
+    await import("docx");
 
   const HEADING = {
     1: HeadingLevel.HEADING_1,
@@ -371,23 +503,60 @@ async function buildDocxBlob(md: string): Promise<Blob> {
     return runs.length > 0 ? runs : [new TextRun(text)];
   }
 
-  const paragraphs = parseMarkdownBlocks(md).map((block) => {
+  const paragraphs: InstanceType<typeof Paragraph>[] = [];
+  for (const block of parseMarkdownBlocks(md)) {
     switch (block.kind) {
       case "heading":
-        return new Paragraph({ heading: HEADING[block.level], children: inlineRuns(block.text) });
+        paragraphs.push(
+          new Paragraph({ heading: HEADING[block.level], children: inlineRuns(block.text) })
+        );
+        break;
       case "bullet":
-        return new Paragraph({ bullet: { level: 0 }, children: inlineRuns(block.text) });
+        paragraphs.push(new Paragraph({ bullet: { level: 0 }, children: inlineRuns(block.text) }));
+        break;
       case "numbered":
-        return new Paragraph({
-          numbering: { reference: "doc-list", level: 0 },
-          children: inlineRuns(block.text),
-        });
+        paragraphs.push(
+          new Paragraph({
+            numbering: { reference: "doc-list", level: 0 },
+            children: inlineRuns(block.text),
+          })
+        );
+        break;
       case "blank":
-        return new Paragraph({});
+        paragraphs.push(new Paragraph({}));
+        break;
+      case "image": {
+        const img = await imageSourceToBytes(block.src);
+        if (!img) break;
+        try {
+          const dims = await imageDimensions(img.bytes, img.mime);
+          // Fit within ~600px of usable page width, keep aspect ratio.
+          const maxW = 600;
+          const scale = dims.width > maxW ? maxW / dims.width : 1;
+          paragraphs.push(
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  type: img.mime === "image/jpeg" ? "jpg" : "png",
+                  data: img.bytes,
+                  transformation: {
+                    width: Math.round(dims.width * scale),
+                    height: Math.round(dims.height * scale),
+                  },
+                }),
+              ],
+            })
+          );
+        } catch {
+          // Skip images that fail to decode; text content still matters more.
+        }
+        break;
+      }
       case "paragraph":
-        return new Paragraph({ children: inlineRuns(block.text) });
+        paragraphs.push(new Paragraph({ children: inlineRuns(block.text) }));
+        break;
     }
-  });
+  }
 
   const doc = new Document({
     numbering: {
@@ -483,6 +652,33 @@ async function buildPdfBlob(md: string): Promise<Blob> {
       case "numbered":
         drawWrapped(stripInlineMarkdown(block.text), regular, bodySize, 12);
         break;
+      case "image": {
+        const img = await imageSourceToBytes(block.src);
+        if (!img) break;
+        try {
+          const embedded =
+            img.mime === "image/jpeg"
+              ? await doc.embedJpg(img.bytes)
+              : await doc.embedPng(img.bytes);
+          const maxW = width - margin * 2;
+          const maxH = height - margin * 2;
+          let drawW = embedded.width;
+          let drawH = embedded.height;
+          const scale = Math.min(maxW / drawW, maxH / drawH, 1);
+          drawW *= scale;
+          drawH *= scale;
+          if (y - drawH < margin) {
+            page = doc.addPage();
+            ({ width, height } = page.getSize());
+            y = height - margin;
+          }
+          page.drawImage(embedded, { x: margin, y: y - drawH, width: drawW, height: drawH });
+          y -= drawH + bodySize;
+        } catch {
+          // Unsupported image data; skip and keep going.
+        }
+        break;
+      }
       case "paragraph": {
         if (block.text.trim() === "---") {
           y -= bodySize;
