@@ -30,7 +30,7 @@ export default function SiteFooter() {
               ⇄
             </span>
             <span className="text-base font-semibold tracking-tight text-foreground">
-              Convertit
+              ConvertDesk
             </span>
           </Link>
           <p className="text-sm leading-6 text-foreground/50">{t("footer.tagline")}</p>
@@ -75,7 +75,7 @@ export default function SiteFooter() {
 
       <div className="border-t border-card-border">
         <div className="mx-auto w-full max-w-3xl px-6 py-5 text-xs text-foreground/40">
-          © {new Date().getFullYear()} Convertit · {t("footer.rights")}
+          © {new Date().getFullYear()} ConvertDesk · {t("footer.rights")}
         </div>
       </div>
     </footer>

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "convertit:lang";
-const EVENT_NAME = "convertit:lang-changed";
+const STORAGE_KEY = "convertdesk:lang";
+const EVENT_NAME = "convertdesk:lang-changed";
 
 export type Lang = "tr" | "en";
 
@@ -74,7 +74,7 @@ const DICT = {
     "home.faq.title": "Sık Sorulan Sorular",
     "home.faq.q1": "Dosyalarım sunucuya yükleniyor mu?",
     "home.faq.a1":
-      "Hayır. Convertit'i farklı kılan tam olarak bu: tüm dönüşümler tarayıcınızın içinde, kendi cihazınızda gerçekleşir. Dosyalarınız internet üzerinden hiçbir sunucuya gönderilmez, bizim tarafımızdan görülmez ve saklanmaz.",
+      "Hayır. ConvertDesk'i farklı kılan tam olarak bu: tüm dönüşümler tarayıcınızın içinde, kendi cihazınızda gerçekleşir. Dosyalarınız internet üzerinden hiçbir sunucuya gönderilmez, bizim tarafımızdan görülmez ve saklanmaz.",
     "home.faq.q2": "Hangi formatlar destekleniyor?",
     "home.faq.a2":
       "Belge tarafında PDF, Word (DOCX), TXT, Markdown ve HTML — her format diğer tüm formatlara dönüştürülebilir. Resim tarafında JPG, PNG, WEBP, BMP, ICO ve PDF. Tablo tarafında Excel (XLSX) ve CSV. Ayrıca PDF birleştirme ve bölme araçları da mevcut.",
@@ -93,14 +93,14 @@ const DICT = {
 
     "about.title": "Hakkımızda",
     "about.intro":
-      "Convertit, dosya dönüştürmenin gizlilikten ödün vermeden de mümkün olduğunu kanıtlamak için kuruldu.",
+      "ConvertDesk, dosya dönüştürmenin gizlilikten ödün vermeden de mümkün olduğunu kanıtlamak için kuruldu.",
     "about.p1":
       "Geleneksel online dönüştürücüler dosyalarınızı kendi sunucularına yükler, orada işler ve size geri gönderir. Bu süreçte dosyalarınızın kopyaları yabancı sunucularda dolaşır; ne kadar süre saklandığını, kimlerin erişebildiğini bilemezsiniz. Özel belgeler, sözleşmeler, kimlik fotokopileri için bu ciddi bir risktir.",
     "about.p2":
-      "Convertit bu sorunu kökünden çözer: dönüşüm motorumuz tamamen tarayıcınızın içinde çalışır. Dosyanız cihazınızdan asla çıkmaz. Biz dahil hiç kimse dosyalarınızı göremez — çünkü teknik olarak bize hiç ulaşmazlar.",
+      "ConvertDesk bu sorunu kökünden çözer: dönüşüm motorumuz tamamen tarayıcınızın içinde çalışır. Dosyanız cihazınızdan asla çıkmaz. Biz dahil hiç kimse dosyalarınızı göremez — çünkü teknik olarak bize hiç ulaşmazlar.",
     "about.p3":
       "PDF, Word, Excel, Markdown, HTML ve resim formatları arasında dönüşüm; PDF birleştirme ve bölme; toplu dönüştürme ve ZIP indirme gibi araçların tamamını modern web teknolojileriyle, ücretsiz olarak sunuyoruz.",
-    "about.whyTitle": "Neden Convertit?",
+    "about.whyTitle": "Neden ConvertDesk?",
     "about.why1": "Dosyalarınız asla sunucuya yüklenmez — %100 yerel işlem",
     "about.why2": "Kayıt zorunluluğu yok, temel kullanım tamamen ücretsiz",
     "about.why3": "Her belge formatı diğer tüm formatlara dönüşür",
@@ -117,10 +117,10 @@ const DICT = {
     "terms.title": "Kullanım Koşulları",
     "terms.updated": "Son güncelleme: 10 Haziran 2026",
     "terms.intro":
-      "Convertit'i kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız. Lütfen dikkatlice okuyun.",
+      "ConvertDesk'i kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız. Lütfen dikkatlice okuyun.",
     "terms.s1.title": "1. Hizmetin Kapsamı",
     "terms.s1.body":
-      "Convertit, dosya dönüştürme işlemlerini kullanıcının kendi tarayıcısında gerçekleştiren ücretsiz bir web uygulamasıdır. Dosyalarınız sunucularımıza yüklenmez; bu nedenle dosyalarınızın içeriğinden ve dönüşüm sonuçlarının doğruluğundan kaynaklanan sorumluluk kullanıcıya aittir.",
+      "ConvertDesk, dosya dönüştürme işlemlerini kullanıcının kendi tarayıcısında gerçekleştiren ücretsiz bir web uygulamasıdır. Dosyalarınız sunucularımıza yüklenmez; bu nedenle dosyalarınızın içeriğinden ve dönüşüm sonuçlarının doğruluğundan kaynaklanan sorumluluk kullanıcıya aittir.",
     "terms.s2.title": "2. Kabul Edilebilir Kullanım",
     "terms.s2.body":
       "Hizmeti yalnızca yasal amaçlarla kullanabilirsiniz. Telif hakkıyla korunan içerikleri izinsiz dönüştürmek, zararlı yazılım yaymak veya hizmetin altyapısına zarar vermeye çalışmak yasaktır.",
@@ -129,7 +129,7 @@ const DICT = {
       "Premium üyelik, Resmi Satıcımız (Merchant of Record) Paddle aracılığıyla satın alınır. Ödeme, faturalandırma ve iade süreçleri Paddle'ın koşullarına tabidir. Aboneliğinizi istediğiniz zaman iptal edebilirsiniz; iptal, mevcut fatura döneminin sonunda geçerli olur.",
     "terms.s4.title": "4. Sorumluluk Reddi",
     "terms.s4.body":
-      "Hizmet \"olduğu gibi\" sunulur. Dönüşüm sonuçlarının belirli bir amaca uygunluğu garanti edilmez. Önemli belgelerde dönüşüm sonucunu kontrol etmek kullanıcının sorumluluğundadır. Convertit, dolaylı veya doğrudan veri kaybından sorumlu tutulamaz.",
+      "Hizmet \"olduğu gibi\" sunulur. Dönüşüm sonuçlarının belirli bir amaca uygunluğu garanti edilmez. Önemli belgelerde dönüşüm sonucunu kontrol etmek kullanıcının sorumluluğundadır. ConvertDesk, dolaylı veya doğrudan veri kaybından sorumlu tutulamaz.",
     "terms.s5.title": "5. Değişiklikler",
     "terms.s5.body":
       "Bu koşullar zaman zaman güncellenebilir. Önemli değişiklikler bu sayfada duyurulur. Değişiklik sonrası hizmeti kullanmaya devam etmeniz, güncel koşulları kabul ettiğiniz anlamına gelir.",
@@ -140,10 +140,10 @@ const DICT = {
     "privacy.title": "Gizlilik Politikası",
     "privacy.updated": "Son güncelleme: 8 Haziran 2026",
     "privacy.intro":
-      "Convertit olarak gizliliğinize önem veriyoruz. Bu sayfa, sitemizi kullanırken hangi verilerin toplandığını ve nasıl kullanıldığını açıklar.",
+      "ConvertDesk olarak gizliliğinize önem veriyoruz. Bu sayfa, sitemizi kullanırken hangi verilerin toplandığını ve nasıl kullanıldığını açıklar.",
     "privacy.section1.title": "1. Dosya Dönüştürme İşlemleri",
     "privacy.section1.body":
-      "Convertit'teki tüm dosya dönüştürme işlemleri tamamen tarayıcınızda gerçekleşir. Yüklediğiniz dosyalar hiçbir zaman sunucularımıza gönderilmez veya saklanmaz.",
+      "ConvertDesk'teki tüm dosya dönüştürme işlemleri tamamen tarayıcınızda gerçekleşir. Yüklediğiniz dosyalar hiçbir zaman sunucularımıza gönderilmez veya saklanmaz.",
     "privacy.section2.title": "2. Hesap Bilgileri",
     "privacy.section2.body":
       "Kayıt olduğunuzda, kimlik doğrulama hizmeti sağlayıcımız Clerk aracılığıyla ad, e-posta adresi gibi temel hesap bilgileriniz işlenir. Bu bilgiler yalnızca hesabınızı yönetmek ve premium üyelik durumunuzu belirlemek için kullanılır.",
@@ -439,7 +439,7 @@ const DICT = {
     "home.faq.title": "Frequently Asked Questions",
     "home.faq.q1": "Are my files uploaded to a server?",
     "home.faq.a1":
-      "No. This is exactly what makes Convertit different: every conversion runs inside your browser, on your own device. Your files are never sent over the internet, never seen by us, and never stored anywhere.",
+      "No. This is exactly what makes ConvertDesk different: every conversion runs inside your browser, on your own device. Your files are never sent over the internet, never seen by us, and never stored anywhere.",
     "home.faq.q2": "Which formats are supported?",
     "home.faq.a2":
       "On the document side: PDF, Word (DOCX), TXT, Markdown and HTML — every format converts to every other one. On the image side: JPG, PNG, WEBP, BMP, ICO and PDF. For tables: Excel (XLSX) and CSV. There are also PDF merge and split tools.",
@@ -458,14 +458,14 @@ const DICT = {
 
     "about.title": "About Us",
     "about.intro":
-      "Convertit was built to prove that file conversion is possible without sacrificing privacy.",
+      "ConvertDesk was built to prove that file conversion is possible without sacrificing privacy.",
     "about.p1":
       "Traditional online converters upload your files to their servers, process them there and send them back. Along the way, copies of your files travel through machines you don't control; you can't know how long they're kept or who can access them. For private documents, contracts or ID scans, that's a serious risk.",
     "about.p2":
-      "Convertit solves this at the root: our conversion engine runs entirely inside your browser. Your file never leaves your device. Nobody — including us — can see your files, because they technically never reach us.",
+      "ConvertDesk solves this at the root: our conversion engine runs entirely inside your browser. Your file never leaves your device. Nobody — including us — can see your files, because they technically never reach us.",
     "about.p3":
       "Conversion between PDF, Word, Excel, Markdown, HTML and image formats; PDF merging and splitting; bulk conversion with ZIP download — all of it built on modern web technology, free to use.",
-    "about.whyTitle": "Why Convertit?",
+    "about.whyTitle": "Why ConvertDesk?",
     "about.why1": "Your files are never uploaded — 100% local processing",
     "about.why2": "No forced sign-up, core features completely free",
     "about.why3": "Every document format converts to every other format",
@@ -482,10 +482,10 @@ const DICT = {
     "terms.title": "Terms of Use",
     "terms.updated": "Last updated: June 10, 2026",
     "terms.intro":
-      "By using Convertit you agree to the terms below. Please read them carefully.",
+      "By using ConvertDesk you agree to the terms below. Please read them carefully.",
     "terms.s1.title": "1. Scope of the Service",
     "terms.s1.body":
-      "Convertit is a free web application that performs file conversions inside the user's own browser. Your files are not uploaded to our servers; responsibility for file contents and for verifying conversion results therefore rests with the user.",
+      "ConvertDesk is a free web application that performs file conversions inside the user's own browser. Your files are not uploaded to our servers; responsibility for file contents and for verifying conversion results therefore rests with the user.",
     "terms.s2.title": "2. Acceptable Use",
     "terms.s2.body":
       "You may only use the service for lawful purposes. Converting copyrighted content without permission, distributing malware, or attempting to damage the service's infrastructure is prohibited.",
@@ -494,7 +494,7 @@ const DICT = {
       "Premium membership is purchased through our Merchant of Record, Paddle. Payment, billing and refunds are subject to Paddle's terms. You can cancel your subscription at any time; cancellation takes effect at the end of the current billing period.",
     "terms.s4.title": "4. Disclaimer",
     "terms.s4.body":
-      "The service is provided \"as is\". Fitness of conversion results for any particular purpose is not guaranteed. Verifying the output of important documents is the user's responsibility. Convertit cannot be held liable for direct or indirect data loss.",
+      "The service is provided \"as is\". Fitness of conversion results for any particular purpose is not guaranteed. Verifying the output of important documents is the user's responsibility. ConvertDesk cannot be held liable for direct or indirect data loss.",
     "terms.s5.title": "5. Changes",
     "terms.s5.body":
       "These terms may be updated from time to time. Significant changes will be announced on this page. Continuing to use the service after a change means you accept the updated terms.",
@@ -505,10 +505,10 @@ const DICT = {
     "privacy.title": "Privacy Policy",
     "privacy.updated": "Last updated: June 8, 2026",
     "privacy.intro":
-      "At Convertit, we care about your privacy. This page explains what data is collected when you use our site and how it is used.",
+      "At ConvertDesk, we care about your privacy. This page explains what data is collected when you use our site and how it is used.",
     "privacy.section1.title": "1. File Conversion",
     "privacy.section1.body":
-      "All file conversions on Convertit happen entirely in your browser. The files you upload are never sent to or stored on our servers.",
+      "All file conversions on ConvertDesk happen entirely in your browser. The files you upload are never sent to or stored on our servers.",
     "privacy.section2.title": "2. Account Information",
     "privacy.section2.body":
       "When you sign up, basic account information such as your name and email address is processed through our authentication provider, Clerk. This information is used solely to manage your account and determine your premium membership status.",
@@ -534,7 +534,9 @@ export type TKey = keyof typeof DICT["tr"];
 
 export function getLang(): Lang {
   if (typeof window === "undefined") return "tr";
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  // Fall back to the pre-rename key so existing users keep their preference.
+  const stored =
+    window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem("convertit:lang");
   return stored === "en" ? "en" : "tr";
 }
 

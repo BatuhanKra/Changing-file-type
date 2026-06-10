@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Convertit — Ücretsiz Online Dosya Dönüştürücü | PDF, Word, Excel, Resim",
-    template: "%s | Convertit",
+    default: "ConvertDesk — Ücretsiz Online Dosya Dönüştürücü | PDF, Word, Excel, Resim",
+    template: "%s | ConvertDesk",
   },
   description:
     "PDF, Word (DOCX), Excel (XLSX), CSV, Markdown, HTML, JPG, PNG ve WEBP dosyalarınızı ücretsiz dönüştürün. PDF birleştirme ve bölme araçları. Dosyalarınız hiçbir sunucuya yüklenmez — %100 tarayıcıda, %100 gizli.",
@@ -37,16 +37,16 @@ export const metadata: Metadata = {
     "file converter",
   ],
   openGraph: {
-    title: "Convertit — Ücretsiz Online Dosya Dönüştürücü",
+    title: "ConvertDesk — Ücretsiz Online Dosya Dönüştürücü",
     description:
       "PDF, Word, Excel, resim ve daha fazlasını tarayıcınızda dönüştürün. Dosyalarınız asla sunucuya yüklenmez.",
     type: "website",
     locale: "tr_TR",
-    siteName: "Convertit",
+    siteName: "ConvertDesk",
   },
   twitter: {
     card: "summary",
-    title: "Convertit — Ücretsiz Online Dosya Dönüştürücü",
+    title: "ConvertDesk — Ücretsiz Online Dosya Dönüştürücü",
     description:
       "PDF, Word, Excel, resim ve daha fazlasını tarayıcınızda dönüştürün. %100 gizli.",
   },

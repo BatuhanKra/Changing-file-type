@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
+import { CONVERSION_PAGES } from "@/lib/conversion-pages";
 
 // Set NEXT_PUBLIC_SITE_URL in your deployment environment so the sitemap
 // points at the real domain.
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://convertit.example.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://convertdesk.example.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
@@ -16,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/iletisim",
     "/gizlilik",
     "/kullanim-kosullari",
+    ...CONVERSION_PAGES.map((p) => `/${p.slug}`),
   ];
 
   return routes.map((route) => ({

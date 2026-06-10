@@ -18,7 +18,7 @@ export default function SiteHeader() {
             ⇄
           </span>
           <span className="text-lg font-semibold tracking-tight text-foreground">
-            Convertit
+            ConvertDesk
           </span>
           {premium && (
             <span className="rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-2.5 py-0.5 text-xs font-semibold text-black shadow-sm">

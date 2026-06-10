@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
 
 // Replace with the address you actually monitor before going live.
-const CONTACT_EMAIL = "convertitapp@gmail.com";
+const CONTACT_EMAIL = "convertdeskapp@gmail.com";
 
 export default function ContactPage() {
   const { t } = useLanguage();
