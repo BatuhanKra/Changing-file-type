@@ -56,6 +56,8 @@ const DICT = {
     "footer.contact": "İletişim",
     "footer.terms": "Kullanım Koşulları",
 
+    "teaser.text": "Premium ile: 200 MB dosya, 10'lu toplu dönüşüm ve sana özel altın tema",
+    "teaser.dismiss": "Kapat",
     "home.trust.directions": "29+ dönüşüm yönü",
     "home.trust.browser": "%100 tarayıcıda çalışır",
     "home.trust.free": "Ücretsiz ve kayıt gerektirmez",
@@ -421,6 +423,8 @@ const DICT = {
     "footer.contact": "Contact",
     "footer.terms": "Terms of Use",
 
+    "teaser.text": "With Premium: 200 MB files, 10-file bulk conversion and your own gold theme",
+    "teaser.dismiss": "Dismiss",
     "home.trust.directions": "29+ conversion directions",
     "home.trust.browser": "Runs 100% in your browser",
     "home.trust.free": "Free, no sign-up required",

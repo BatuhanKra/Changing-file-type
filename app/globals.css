@@ -36,3 +36,48 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Animated gold shimmer used by the premium frame and teaser */
+@keyframes gold-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.gold-strip {
+  background: linear-gradient(
+    90deg,
+    #b45309,
+    #f59e0b,
+    #fde68a,
+    #f59e0b,
+    #b45309
+  );
+  background-size: 200% 100%;
+  animation: gold-shimmer 4s linear infinite;
+}
+
+.gold-strip-vertical {
+  background: linear-gradient(
+    180deg,
+    #b45309,
+    #f59e0b,
+    #fde68a,
+    #f59e0b,
+    #b45309
+  );
+  background-size: 100% 200%;
+  animation: gold-shimmer-y 4s linear infinite;
+}
+
+@keyframes gold-shimmer-y {
+  0% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 50% 200%;
+  }
+}
